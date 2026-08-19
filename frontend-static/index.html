@@ -1098,12 +1098,12 @@ function apiBase() {
 }
 
 const VIBE_TAGS = [
-  'chill',
-  'adventure',
-  'culture',
-  'food',
-  'nature',
-  'budget'
+  'расслабон',
+  'движ',
+  'культура',
+  'еда',
+  'природа',
+  'бюджет'
 ];
 
 const MUST_HAVES = [
@@ -1113,12 +1113,12 @@ const MUST_HAVES = [
 ];
 
 const VIBE_INFO = {
-  chill: ['☁', 'Спокойствие'],
-  adventure: ['↗', 'Приключения'],
-  culture: ['◈', 'Культура'],
-  food: ['✦', 'Еда'],
-  nature: ['⌁', 'Природа'],
-  budget: ['₽', 'Бюджет']
+  'расслабон': ['☁', 'Спокойствие'],
+  'движ': ['↗', 'Приключения'],
+  'культура': ['◈', 'Культура'],
+  'еда': ['✦', 'Еда'],
+  'природа': ['⌁', 'Природа'],
+  'бюджет': ['₽', 'Бюджет']
 };
 
 const MUST_INFO = {
@@ -2753,6 +2753,72 @@ async function renderResult(
 
                 </div>
 
+
+              </div>
+
+            </section>
+
+          `
+          : ''
+      }
+
+
+      ${
+        best.why && best.why.length
+          ? `
+
+            <section
+              style="
+                margin-bottom:55px
+              "
+            >
+
+              <div class="section-title">
+
+                <h3>
+                  Почему сюда?
+                </h3>
+
+                <span>
+                  под ваш общий вайб
+                </span>
+
+              </div>
+
+
+              <div class="hotel-box">
+
+                ${best.why
+                  .map(
+                    (place) => `
+
+                      <div
+                        style="
+                          padding:10px 0;
+                          border-bottom:1px solid var(--line);
+                        "
+                      >
+
+                        <div class="hotel-title">
+                          ${escapeHtml(
+                            place.name ||
+                            'Место'
+                          )}
+                        </div>
+
+                        <div class="hotel-meta">
+                          ${escapeHtml(
+                            (place.kinds || '')
+                              .split(',')[0]
+                              .replace(/_/g, ' ')
+                          )}
+                        </div>
+
+                      </div>
+
+                    `
+                  )
+                  .join('')}
 
               </div>
 

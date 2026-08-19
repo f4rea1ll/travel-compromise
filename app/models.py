@@ -6,12 +6,12 @@ from pydantic import BaseModel, field_validator
 from datetime import date
 
 class VibeTag(str, Enum):
-    CHILL = "chill"
-    ADVENTURE = "adventure"
-    CULTURE = "culture"
-    FOOD = "food"
-    NATURE = "nature"
-    BUDGET = "budget"
+    CHILL = "расслабон"
+    ADVENTURE = "движ"
+    CULTURE = "культура"
+    FOOD = "еда"
+    NATURE = "природа"
+    BUDGET = "бюджет"
 
 
 class MustHave(str, Enum):

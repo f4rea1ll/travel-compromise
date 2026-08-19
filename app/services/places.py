@@ -33,7 +33,6 @@ async def find_attractions(lat: float, lon: float, vibe: str, radius: int = 5000
                 "radius": radius,
                 "kinds": kinds,
                 "limit": limit,
-                "format": "json",
                 "rate": 2,
             },
         )
