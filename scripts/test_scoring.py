@@ -28,7 +28,9 @@ async def main():
     for r in results:
         print(f"{r['city']} — score {r['total_score']}")
         print(f"  Участник 1: {r['participant_1']['transport_price']} RUB, вайб {r['participant_1']['vibe_match']}")
+        print(f"    checkout: {r['participant_1'].get('transport_checkout_url')}")
         print(f"  Участник 2: {r['participant_2']['transport_price']} RUB, вайб {r['participant_2']['vibe_match']}")
+        print(f"    checkout: {r['participant_2'].get('transport_checkout_url')}")
         if r.get("hotel"):
             h = r["hotel"]
             print(f"  Отель: {h['name']} ({h['stars']}★, {h['rating']}) — {h['price']}")

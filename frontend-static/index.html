@@ -705,7 +705,7 @@ input[type="range"]::-webkit-slider-thumb {
 .result-shell {
   width: min(1100px, calc(100% - 40px));
   margin: 0 auto;
-  padding-bottom: 100px;
+  padding-bottom: 70px;
 }
 
 .result-heading {
@@ -821,8 +821,8 @@ input[type="range"]::-webkit-slider-thumb {
 .metric {
   background: white;
   border: 2px solid var(--line);
-  border-radius: 20px;
-  padding: 22px;
+  border-radius: 18px;
+  padding: 16px;
 }
 
 .metric:nth-child(1) {
@@ -878,11 +878,18 @@ input[type="range"]::-webkit-slider-thumb {
 .runner {
   background: white;
   border: 2px solid var(--purple);
-  border-radius: 22px;
-  padding: 23px;
+  border-radius: 20px;
+  padding: 17px;
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 15px;
+  align-items: center;
+  transition: transform .2s, box-shadow .2s;
+}
+
+.runner.js-alt:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 0 var(--lime);
 }
 
 .runner:nth-child(2) {
@@ -913,8 +920,8 @@ input[type="range"]::-webkit-slider-thumb {
   margin-top: 15px;
   background: var(--orange);
   color: white;
-  border-radius: 18px;
-  padding: 18px;
+  border-radius: 16px;
+  padding: 14px 16px;
 }
 
 .hotel-title {
@@ -930,8 +937,8 @@ input[type="range"]::-webkit-slider-thumb {
 
 .bottom-note {
   text-align: center;
-  margin-top: 70px;
-  padding-top: 45px;
+  margin-top: 46px;
+  padding-top: 32px;
   border-top: 2px solid var(--line);
 }
 
@@ -2339,25 +2346,17 @@ function renderWait(
    RESULT
 ========================================================= */
 
-async function renderResult(
-  sessionId
-) {
+async function renderResult(sessionId) {
 
-  clearInterval(
-    pollTimer
-  );
-
+  clearInterval(pollTimer);
 
   app.innerHTML = `
 
     <div class="result-page">
 
-
       <div class="result-shell">
 
-
         <header class="topbar">
-
 
           <div class="logo">
 
@@ -2371,17 +2370,13 @@ async function renderResult(
 
           </div>
 
-
           <div class="step-counter">
             04 / 04
           </div>
 
-
         </header>
 
-
         <div class="result-heading">
-
 
           <div class="eyebrow">
 
@@ -2390,7 +2385,6 @@ async function renderResult(
             Компромисс найден
 
           </div>
-
 
           <h2>
 
@@ -2401,7 +2395,6 @@ async function renderResult(
 
           </h2>
 
-
           <p>
 
             Мы сравнили бюджет, транспорт,
@@ -2411,7 +2404,6 @@ async function renderResult(
           </p>
 
         </div>
-
 
         <div id="result-out">
 
@@ -2425,31 +2417,18 @@ async function renderResult(
 
         </div>
 
-
       </div>
 
     </div>
   `;
 
-
-  const out =
-    document.getElementById(
-      'result-out'
-    );
-
+  const out = document.getElementById('result-out');
 
   try {
 
-    const data =
-      await api(
-        `/session/${sessionId}/result`
-      );
+    const data = await api(`/session/${sessionId}/result`);
 
-
-    if (
-      !data.matches ||
-      !data.matches.length
-    ) {
+    if (!data.matches || !data.matches.length) {
 
       out.innerHTML = `
 
@@ -2468,7 +2447,6 @@ async function renderResult(
 
           </h3>
 
-
           <p class="muted">
 
             Попробуйте изменить бюджет
@@ -2484,445 +2462,7 @@ async function renderResult(
 
     }
 
-
-    const matches =
-      data.matches;
-
-    const best =
-      matches[0];
-
-
-    const score =
-      normalizeScore(
-        best.total_score
-      );
-
-
-    const city =
-      best.city ||
-      'Ваш город';
-
-
-    const image =
-      cityImage(city);
-
-
-    const p1 =
-      best.participant_1 ||
-      {};
-
-    const p2 =
-      best.participant_2 ||
-      {};
-
-
-    const transport1 =
-      Number(
-        p1.transport_price || 0
-      );
-
-
-    const transport2 =
-      Number(
-        p2.transport_price || 0
-      );
-
-
-    const avgTransport =
-      Math.round(
-        (
-          transport1 +
-          transport2
-        ) / 2
-      );
-
-
-    const vibe1 =
-      Math.round(
-        Number(
-          p1.vibe_match || 0
-        ) * 100
-      );
-
-
-    const vibe2 =
-      Math.round(
-        Number(
-          p2.vibe_match || 0
-        ) * 100
-      );
-
-
-    const vibeAvg =
-      Math.round(
-        (vibe1 + vibe2) / 2
-      );
-
-
-    out.innerHTML = `
-
-      <section class="result-hero">
-
-
-        <div
-          class="result-bg"
-          style="
-            background-image:
-            url('${image}')
-          "
-        ></div>
-
-
-        <div class="result-content">
-
-
-          <div class="match-badge">
-
-            ${score}% совпадение
-
-          </div>
-
-
-          <h1 class="result-city">
-
-            ${escapeHtml(city)}
-
-          </h1>
-
-
-          <div class="result-sub">
-
-
-            <div class="result-chip">
-
-              ✈ ~${formatMoney(
-                avgTransport
-              )} ₽ транспорт
-
-            </div>
-
-
-            <div class="result-chip">
-
-              ✦ ${vibeAvg}% совпадение по вайбу
-
-            </div>
-
-
-            <div class="result-chip">
-
-              ♡ подходит вам обоим
-
-            </div>
-
-
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <section class="metrics">
-
-
-        <div class="metric">
-
-          <div class="metric-label">
-            Совпадение
-          </div>
-
-          <div class="metric-value">
-            ${score}%
-          </div>
-
-        </div>
-
-
-        <div class="metric">
-
-          <div class="metric-label">
-            Транспорт
-          </div>
-
-          <div class="metric-value">
-            ~${formatMoney(
-              avgTransport
-            )} ₽
-          </div>
-
-        </div>
-
-
-        <div class="metric">
-
-          <div class="metric-label">
-            Участник 01
-          </div>
-
-          <div class="metric-value">
-            ${vibe1}% вайб
-          </div>
-
-        </div>
-
-
-        <div class="metric">
-
-          <div class="metric-label">
-            Участник 02
-          </div>
-
-          <div class="metric-value">
-            ${vibe2}% вайб
-          </div>
-
-        </div>
-
-
-      </section>
-
-
-      ${
-        best.hotel
-          ? `
-
-            <section
-              style="
-                margin-bottom:55px
-              "
-            >
-
-              <div class="section-title">
-
-                <h3>
-                  Где остановиться?
-                </h3>
-
-                <span>
-                  рекомендованный отель
-                </span>
-
-              </div>
-
-
-              <div class="hotel-box">
-
-
-                <div class="hotel-title">
-
-                  ${escapeHtml(
-                    best.hotel.name ||
-                    'Рекомендованный отель'
-                  )}
-
-                  ${
-                    best.hotel.stars
-                      ? ' ' +
-                        '★'.repeat(
-                          Number(
-                            best.hotel.stars
-                          )
-                        )
-                      : ''
-                  }
-
-                </div>
-
-
-                <div class="hotel-meta">
-
-                  ${
-                    best.hotel.price
-                      ? formatMoney(
-                          Math.round(
-                            Number(
-                              best.hotel.price
-                            )
-                          )
-                        ) + ' ₽'
-                      : 'Цена не указана'
-                  }
-
-
-                  ${
-                    best.hotel.breakfast_included
-                      ? ' · завтрак включён'
-                      : ''
-                  }
-
-                </div>
-
-
-              </div>
-
-            </section>
-
-          `
-          : ''
-      }
-
-
-      ${
-        best.why && best.why.length
-          ? `
-
-            <section
-              style="
-                margin-bottom:55px
-              "
-            >
-
-              <div class="section-title">
-
-                <h3>
-                  Почему сюда?
-                </h3>
-
-                <span>
-                  под ваш общий вайб
-                </span>
-
-              </div>
-
-
-              <div class="hotel-box">
-
-                ${best.why
-                  .map(
-                    (place) => `
-
-                      <div
-                        style="
-                          padding:10px 0;
-                          border-bottom:1px solid var(--line);
-                        "
-                      >
-
-                        <div class="hotel-title">
-                          ${escapeHtml(
-                            place.name ||
-                            'Место'
-                          )}
-                        </div>
-
-                        <div class="hotel-meta">
-                          ${escapeHtml(
-                            (place.kinds || '')
-                              .split(',')[0]
-                              .replace(/_/g, ' ')
-                          )}
-                        </div>
-
-                      </div>
-
-                    `
-                  )
-                  .join('')}
-
-              </div>
-
-            </section>
-
-          `
-          : ''
-      }
-
-
-      ${
-        matches.length > 1
-          ? `
-
-            <section>
-
-
-              <div class="section-title">
-
-                <h3>
-                  Ещё варианты
-                </h3>
-
-                <span>
-                  ближайшие совпадения
-                </span>
-
-              </div>
-
-
-              <div class="runners">
-
-
-                ${matches
-                  .slice(1, 3)
-                  .map(
-                    (m, index) => `
-
-                      <div class="runner">
-
-
-                        <div>
-
-                          <div class="runner-rank">
-
-                            0${index + 2}
-                            · АЛЬТЕРНАТИВА
-
-                          </div>
-
-
-                          <div class="runner-city">
-
-                            ${escapeHtml(
-                              m.city ||
-                              'Неизвестно'
-                            )}
-
-                          </div>
-
-                        </div>
-
-
-                        <div class="runner-score">
-
-                          ${normalizeScore(
-                            m.total_score
-                          )}%
-
-                        </div>
-
-
-                      </div>
-
-                    `
-                  )
-                  .join('')}
-
-
-              </div>
-
-
-            </section>
-
-          `
-          : ''
-      }
-
-
-      <div class="bottom-note">
-
-        <h3>
-          Ваш компромисс найден.
-        </h3>
-
-        <p>
-          Два набора желаний. Один город.
-          Осталось только купить билеты.
-        </p>
-
-      </div>
-
-    `;
-
+    renderMatchDetail(data.matches, 0);
 
   } catch (e) {
 
@@ -2933,9 +2473,7 @@ async function renderResult(
         <div class="error">
 
           Не удалось загрузить результат:
-          ${escapeHtml(
-            e.message
-          )}
+          ${escapeHtml(e.message)}
 
         </div>
 
@@ -2944,6 +2482,404 @@ async function renderResult(
     `;
 
   }
+
+}
+
+
+/* =========================================================
+   RESULT · MATCH DETAIL (переиспользуется для лучшего
+   города и для любой альтернативы, на которую кликнули)
+========================================================= */
+
+function renderMatchDetail(matches, activeIndex) {
+
+  const out = document.getElementById('result-out');
+
+  const match = matches[activeIndex];
+
+  if (!match || !out) {
+    return;
+  }
+
+  const score = normalizeScore(match.total_score);
+
+  const city = match.city || 'Ваш город';
+
+  const image = cityImage(city);
+
+  const p1 = match.participant_1 || {};
+  const p2 = match.participant_2 || {};
+
+  const transport1 = Number(p1.transport_price || 0);
+  const transport2 = Number(p2.transport_price || 0);
+
+  const avgTransport = Math.round(
+    (transport1 + transport2) / 2
+  );
+
+  const vibe1 = Math.round(Number(p1.vibe_match || 0) * 100);
+  const vibe2 = Math.round(Number(p2.vibe_match || 0) * 100);
+
+  const vibeAvg = Math.round((vibe1 + vibe2) / 2);
+
+  const isTop = activeIndex === 0;
+
+  const otherMatches = matches
+    .map((m, i) => ({ m, i }))
+    .filter(({ i }) => i !== activeIndex);
+
+  out.innerHTML = `
+
+    <section class="result-hero">
+
+      <div
+        class="result-bg"
+        style="background-image:url('${image}')"
+      ></div>
+
+      <div class="result-content">
+
+        <div class="match-badge">
+
+          ${score}% совпадение${isTop ? '' : ' · альтернатива'}
+
+        </div>
+
+        <h1 class="result-city">
+
+          ${escapeHtml(city)}
+
+        </h1>
+
+        <div class="result-sub">
+
+          <div class="result-chip">
+            ✈ ~${formatMoney(avgTransport)} ₽ транспорт
+          </div>
+
+          <div class="result-chip">
+            ✦ ${vibeAvg}% совпадение по вайбу
+          </div>
+
+          <div class="result-chip">
+            ♡ подходит вам обоим
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <section class="metrics">
+
+      <div class="metric">
+        <div class="metric-label">Совпадение</div>
+        <div class="metric-value">${score}%</div>
+      </div>
+
+      <div class="metric">
+        <div class="metric-label">Транспорт</div>
+        <div class="metric-value">~${formatMoney(avgTransport)} ₽</div>
+      </div>
+
+      <div class="metric">
+        <div class="metric-label">Участник 01</div>
+        <div class="metric-value">${vibe1}% вайб</div>
+      </div>
+
+      <div class="metric">
+        <div class="metric-label">Участник 02</div>
+        <div class="metric-value">${vibe2}% вайб</div>
+      </div>
+
+    </section>
+
+
+    <section style="margin-bottom:38px">
+
+      <div class="section-title">
+        <h3>Как добраться?</h3>
+        <span>билеты на Tutu</span>
+      </div>
+
+      <div class="runners">
+        ${transportCardHtml('Участник 01', p1)}
+        ${transportCardHtml('Участник 02', p2)}
+      </div>
+
+    </section>
+
+
+    ${match.hotel ? hotelSectionHtml(match.hotel) : ''}
+
+    ${match.why && match.why.length ? whySectionHtml(match.why) : ''}
+
+    ${otherMatches.length ? alternativesSectionHtml(otherMatches) : ''}
+
+
+    <div class="bottom-note">
+
+      <h3>
+        ${isTop ? 'Ваш компромисс найден.' : 'Хороший запасной вариант.'}
+      </h3>
+
+      <p>
+        Два набора желаний. Один город.
+        Осталось только купить билеты.
+      </p>
+
+    </div>
+
+  `;
+
+  document.querySelectorAll('.js-alt').forEach(el => {
+
+    el.onclick = () => {
+
+      const idx = Number(el.dataset.index);
+
+      renderMatchDetail(matches, idx);
+
+      out.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+
+    };
+
+  });
+
+}
+
+
+function transportCardHtml(label, p) {
+
+  const price = Number(p.transport_price || 0);
+  const type = transportTypeLabel(p.transport_type);
+  const url = p.transport_checkout_url;
+
+  return `
+
+    <div class="runner" style="cursor:default">
+
+      <div>
+
+        <div class="runner-rank">
+          ${escapeHtml(label)} · ${escapeHtml(type)}
+        </div>
+
+        <div class="runner-city" style="font-size:24px">
+          ${formatMoney(price)} ₽
+        </div>
+
+        ${
+          p.within_budget === false
+            ? '<div class="hotel-meta" style="color:#c83c22;margin-top:6px">вне бюджета</div>'
+            : ''
+        }
+
+      </div>
+
+      ${
+        url
+          ? `<a
+              href="${escapeAttr(url)}"
+              target="_blank"
+              rel="noopener"
+              class="secondary-btn"
+              style="text-decoration:none;align-self:center;white-space:nowrap"
+            >Купить на Tutu →</a>`
+          : ''
+      }
+
+    </div>
+
+  `;
+
+}
+
+
+function hotelSectionHtml(hotel) {
+
+  return `
+
+    <section style="margin-bottom:38px">
+
+      <div class="section-title">
+        <h3>Где остановиться?</h3>
+        <span>рекомендованный отель</span>
+      </div>
+
+      <div class="hotel-box">
+
+        <div
+          style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:15px;
+            flex-wrap:wrap
+          "
+        >
+
+          <div>
+
+            <div class="hotel-title">
+
+              ${escapeHtml(hotel.name || 'Рекомендованный отель')}
+
+              ${
+                hotel.stars
+                  ? ' ' + '★'.repeat(Number(hotel.stars))
+                  : ''
+              }
+
+            </div>
+
+            <div class="hotel-meta">
+
+              ${
+                hotel.price
+                  ? formatMoney(Math.round(Number(hotel.price))) + ' ₽'
+                  : 'Цена не указана'
+              }
+
+              ${
+                hotel.breakfast_included
+                  ? ' · завтрак включён'
+                  : ''
+              }
+
+            </div>
+
+          </div>
+
+          ${
+            hotel.checkout_url
+              ? `<a
+                  href="${escapeAttr(hotel.checkout_url)}"
+                  target="_blank"
+                  rel="noopener"
+                  class="copy-btn"
+                  style="text-decoration:none;white-space:nowrap"
+                >Забронировать на Tutu →</a>`
+              : ''
+          }
+
+        </div>
+
+      </div>
+
+    </section>
+
+  `;
+
+}
+
+
+function whySectionHtml(places) {
+
+  return `
+
+    <section style="margin-bottom:38px">
+
+      <div class="section-title">
+        <h3>Почему сюда?</h3>
+        <span>под ваш общий вайб</span>
+      </div>
+
+      <div class="hotel-box">
+
+        ${places
+          .map(place => `
+
+            <div
+              style="
+                padding:8px 0;
+                border-bottom:1px solid var(--line)
+              "
+            >
+
+              <div class="hotel-title">
+                ${escapeHtml(place.name || 'Место')}
+              </div>
+
+              <div class="hotel-meta">
+                ${escapeHtml(
+                  (place.kinds || '')
+                    .split(',')[0]
+                    .replace(/_/g, ' ')
+                )}
+              </div>
+
+            </div>
+
+          `)
+          .join('')}
+
+      </div>
+
+    </section>
+
+  `;
+
+}
+
+
+function alternativesSectionHtml(others) {
+
+  return `
+
+    <section>
+
+      <div class="section-title">
+        <h3>Ещё варианты</h3>
+        <span>нажмите, чтобы посмотреть подробнее</span>
+      </div>
+
+      <div class="runners">
+
+        ${others
+          .map(({ m, i }) => `
+
+            <div
+              class="runner js-alt"
+              data-index="${i}"
+              style="cursor:pointer"
+            >
+
+              <div>
+
+                <div class="runner-rank">
+                  ${
+                    i === 0
+                      ? '01 · ЛУЧШИЙ ВАРИАНТ'
+                      : '0' + (i + 1) + ' · АЛЬТЕРНАТИВА'
+                  }
+                </div>
+
+                <div class="runner-city">
+                  ${escapeHtml(m.city || 'Неизвестно')}
+                </div>
+
+              </div>
+
+              <div class="runner-score">
+                ${normalizeScore(m.total_score)}%
+              </div>
+
+            </div>
+
+          `)
+          .join('')}
+
+      </div>
+
+    </section>
+
+  `;
 
 }
 
@@ -2972,6 +2908,28 @@ function normalizeScore(score) {
       )
     )
   );
+
+}
+
+
+const TRANSPORT_LABELS = {
+  train: 'Поезд',
+  suburban: 'Электричка',
+  plane: 'Самолёт',
+  avia: 'Самолёт',
+  bus: 'Автобус',
+  water: 'Водный транспорт'
+};
+
+
+function transportTypeLabel(type) {
+
+  const key =
+    String(type || '')
+      .toLowerCase()
+      .trim();
+
+  return TRANSPORT_LABELS[key] || (type || 'Транспорт');
 
 }
 

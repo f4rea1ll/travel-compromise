@@ -21,47 +21,66 @@ def budget_score(price: float, budget: float) -> float:
     return 0.5
 
 
-async def get_transport_price(origin: str, destination: str, departure_date: str) -> float | None:
-    """Возвращает минимальную цену транспорта до города или None, если ничего не нашлось."""
+async def get_best_transport_offer(origin: str, destination: str, departure_date: str) -> dict | None:
+    """Возвращает лучший (самый дешёвый) вариант транспорта целиком — цену, тип, ссылку на покупку.
+    None, если ничего не нашлось."""
     try:
         result = await search_multitransport(origin, destination, departure_date)
         variants = result.get("variants", [])
         if not variants:
             return None
-        prices = [v["price"]["amount"] for v in variants if "price" in v]
-        return min(prices) if prices else None
+
+        priced = [v for v in variants if "price" in v]
+        if not priced:
+            return None
+
+        cheapest = min(priced, key=lambda v: v["price"]["amount"])
+
+        return {
+            "price": cheapest["price"]["amount"],
+            "currency": cheapest["price"].get("currency", "RUB"),
+            "transport_type": cheapest.get("transport"),
+            "duration_min": cheapest.get("duration_min"),
+            "checkout_url": cheapest.get("checkout_url"),
+            "search_results_url": cheapest.get("search_results_url"),
+        }
     except Exception as e:
         print(f"Ошибка поиска транспорта {origin}→{destination}: {e}")
         return None
 
 
 async def score_candidate(city: str, p1: dict, p2: dict) -> dict | None:
-    """Считает совпадение города с обоими участниками. None, если транспорт не найден хотя бы для одного."""
-    price_1, price_2 = await asyncio.gather(
-        get_transport_price(p1["origin_city"], city, p1["departure_date"]),
-        get_transport_price(p2["origin_city"], city, p2["departure_date"]),
+    offer_1, offer_2 = await asyncio.gather(
+        get_best_transport_offer(p1["origin_city"], city, p1["departure_date"]),
+        get_best_transport_offer(p2["origin_city"], city, p2["departure_date"]),
     )
 
-    if price_1 is None or price_2 is None:
+    if offer_1 is None or offer_2 is None:
         return None
+
+    price_1, price_2 = offer_1["price"], offer_2["price"]
 
     b1 = budget_score(price_1, p1["budget"])
     b2 = budget_score(price_2, p2["budget"])
     v1 = vibe_match_score(city, p1["vibe_tags"])
     v2 = vibe_match_score(city, p2["vibe_tags"])
 
-    total_score = (b1 + b2) * 0.6 + (v1 + v2) * 0.4
+    total_score = ((b1 + b2) / 2) * 0.6 + ((v1 + v2) / 2) * 0.4
 
     return {
         "city": city,
         "total_score": round(total_score, 2),
         "participant_1": {
             "transport_price": price_1,
+            "transport_type": offer_1["transport_type"],
+            "transport_checkout_url": offer_1["checkout_url"],
             "within_budget": price_1 <= p1["budget"],
             "vibe_match": round(v1, 2),
         },
         "participant_2": {
             "transport_price": price_2,
+            "transport_type": offer_2["transport_type"],
+            "transport_checkout_url": offer_2["checkout_url"],
             "within_budget": price_2 <= p2["budget"],
             "vibe_match": round(v2, 2),
         },
