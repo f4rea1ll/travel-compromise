@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import session
+from app.routers import session, places
 
 app = FastAPI(title="Travel Compromise")
 
@@ -12,7 +12,7 @@ app.add_middleware(
 )
 
 app.include_router(session.router)
-
+app.include_router(places.router)
 
 @app.get("/health")
 def health_check():

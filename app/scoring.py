@@ -1,7 +1,7 @@
 import asyncio
 from app.mcp_client import search_multitransport, search_hotels
 from app.candidates import CANDIDATE_CITIES, VIBE_CITY_MAP
-
+from app.services.places import geocode_city, find_attractions
 
 def vibe_match_score(city: str, vibe_tags: list[str]) -> float:
     """Доля вайб-тегов участника, под которые подходит город. От 0 до 1."""
@@ -100,6 +100,50 @@ async def get_best_hotel(city: str, check_in: str, check_out: str, budget: float
         print(f"Ошибка поиска отеля в {city}: {e}")
         return None
 
+async def get_city_attractions(city: str, vibe_tags: list[str], limit: int = 3) -> list[dict]:
+    """
+    Ищет топ-достопримечательности города под общие вайбы обоих участников.
+    Возвращает [] если ничего не нашлось — это не критичная ошибка,
+    результат матча всё равно валиден без 'why'.
+    """
+    try:
+        coords = await geocode_city(city)
+    except Exception as e:
+        print(f"Ошибка геокодинга {city}: {e}")
+        return []
+
+    # если тегов нет — просто берём культурные места как дефолт
+    tags_to_query = vibe_tags or ["культура"]
+
+    tasks = [
+        find_attractions(coords["lat"], coords["lon"], vibe, limit=limit)
+        for vibe in tags_to_query
+    ]
+
+    try:
+        results = await asyncio.gather(*tasks)
+    except Exception as e:
+        print(f"Ошибка поиска мест в {city}: {e}")
+        return []
+
+    seen_names = set()
+    attractions = []
+    for data in results:
+        for feature in data.get("features", []):
+            props = feature["properties"]
+            name = props.get("name")
+            if not name or name in seen_names:
+                continue
+            seen_names.add(name)
+            attractions.append({
+                "name": name,
+                "kinds": props.get("kinds"),
+                "rate": props.get("rate"),
+            })
+
+    attractions.sort(key=lambda a: a.get("rate") or 0, reverse=True)
+    return attractions[:limit]
+
 async def find_best_matches(p1: dict, p2: dict, top_n: int = 3) -> list[dict]:
     """Гоняет все города-кандидаты параллельно, возвращает top_n лучших с отелями."""
     tasks = [score_candidate(city, p1, p2) for city in CANDIDATE_CITIES]
@@ -118,5 +162,20 @@ async def find_best_matches(p1: dict, p2: dict, top_n: int = 3) -> list[dict]:
 
     for match, hotel in zip(top_matches, hotels):
         match["hotel"] = hotel
+
+    # Общие вайбы обоих участников — это и есть "компромисс" в достопримечательностях.
+    # Если пересечения нет, берём объединение (лучше показать что-то, чем ничего).
+    common_vibes = list(set(p1["vibe_tags"]) & set(p2["vibe_tags"]))
+    if not common_vibes:
+        common_vibes = list(set(p1["vibe_tags"]) | set(p2["vibe_tags"]))
+
+    attraction_tasks = [
+        get_city_attractions(m["city"], common_vibes)
+        for m in top_matches
+    ]
+    attractions_results = await asyncio.gather(*attraction_tasks)
+
+    for match, attractions in zip(top_matches, attractions_results):
+        match["why"] = attractions
 
     return top_matches
