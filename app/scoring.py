@@ -67,11 +67,47 @@ async def score_candidate(city: str, p1: dict, p2: dict) -> dict | None:
         },
     }
 
+async def get_best_hotel(city: str, check_in: str, check_out: str, budget: float) -> dict | None:
+    """Ищет лучший отель в городе в рамках остатка бюджета после дороги. None, если ничего не нашлось."""
+    try:
+        result = await search_hotels(city, check_in, check_out, price_max=budget)
+        hotels = result.get("hotels", [])
+        if not hotels:
+            return None
+
+        # Берём первый — search_hotels уже сортирует по релевантности/цене
+        top = hotels[0]
+        best_offer = top.get("best_offer", {})
+
+        return {
+            "name": top.get("name"),
+            "stars": top.get("stars"),
+            "rating": top.get("rating"),
+            "price": best_offer.get("price"),
+            "breakfast_included": best_offer.get("breakfast_included"),
+            "checkout_url": best_offer.get("checkout_url"),
+        }
+    except Exception as e:
+        print(f"Ошибка поиска отеля в {city}: {e}")
+        return None
 
 async def find_best_matches(p1: dict, p2: dict, top_n: int = 3) -> list[dict]:
-    """Гоняет все города-кандидаты параллельно и возвращает top_n лучших."""
+    """Гоняет все города-кандидаты параллельно, возвращает top_n лучших с отелями."""
     tasks = [score_candidate(city, p1, p2) for city in CANDIDATE_CITIES]
     results = await asyncio.gather(*tasks)
     valid_results = [r for r in results if r is not None]
     valid_results.sort(key=lambda r: r["total_score"], reverse=True)
-    return valid_results[:top_n]
+    top_matches = valid_results[:top_n]
+
+    # Отель ищем только для финалистов — не для всех 15 кандидатов
+    remaining_budget = min(p1["budget"], p2["budget"]) * 0.4  # ориентир: ~40% бюджета на жильё
+    hotel_tasks = [
+        get_best_hotel(m["city"], p1["departure_date"], p1["return_date"], remaining_budget)
+        for m in top_matches
+    ]
+    hotels = await asyncio.gather(*hotel_tasks)
+
+    for match, hotel in zip(top_matches, hotels):
+        match["hotel"] = hotel
+
+    return top_matches

@@ -12,12 +12,14 @@ async def main():
         "budget": 5000,
         "vibe_tags": ["culture", "food"],
         "departure_date": "2026-09-05",
+        "return_date": "2026-09-07",
     }
     participant_2 = {
         "origin_city": "Санкт-Петербург",
         "budget": 5000,
         "vibe_tags": ["chill", "culture"],
         "departure_date": "2026-09-05",
+        "return_date": "2026-09-07",
     }
 
     results = await find_best_matches(participant_1, participant_2)
@@ -27,8 +29,12 @@ async def main():
         print(f"{r['city']} — score {r['total_score']}")
         print(f"  Участник 1: {r['participant_1']['transport_price']} RUB, вайб {r['participant_1']['vibe_match']}")
         print(f"  Участник 2: {r['participant_2']['transport_price']} RUB, вайб {r['participant_2']['vibe_match']}")
+        if r.get("hotel"):
+            h = r["hotel"]
+            print(f"  Отель: {h['name']} ({h['stars']}★, {h['rating']}) — {h['price']}")
+        else:
+            print("  Отель: не найден")
         print()
-
 
 if __name__ == "__main__":
     asyncio.run(main())
