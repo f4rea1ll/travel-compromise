@@ -41,13 +41,16 @@ async def get_best_transport_offer(origin: str, destination: str, departure_date
             "currency": cheapest["price"].get("currency", "RUB"),
             "transport_type": cheapest.get("transport"),
             "duration_min": cheapest.get("duration_min"),
+            "departure_time": cheapest.get("departure_time"),      
+            "arrival_time": cheapest.get("arrival_time"),          
+            "departure_date": cheapest.get("departure_date"),      
+            "arrival_date": cheapest.get("arrival_date"),          
             "checkout_url": cheapest.get("checkout_url"),
             "search_results_url": cheapest.get("search_results_url"),
         }
     except Exception as e:
         print(f"Ошибка поиска транспорта {origin}→{destination}: {e}")
         return None
-
 
 async def score_candidate(city: str, p1: dict, p2: dict) -> dict | None:
     offer_1, offer_2 = await asyncio.gather(
@@ -73,6 +76,11 @@ async def score_candidate(city: str, p1: dict, p2: dict) -> dict | None:
         "participant_1": {
             "transport_price": price_1,
             "transport_type": offer_1["transport_type"],
+            "transport_duration_min": offer_1.get("duration_min"),           # новое
+            "transport_departure_time": offer_1.get("departure_time"),       # новое
+            "transport_arrival_time": offer_1.get("arrival_time"),           # новое
+            "transport_departure_date": offer_1.get("departure_date"),       # новое
+            "transport_arrival_date": offer_1.get("arrival_date"),           # новое
             "transport_checkout_url": offer_1["checkout_url"],
             "within_budget": price_1 <= p1["budget"],
             "vibe_match": round(v1, 2),
@@ -80,6 +88,11 @@ async def score_candidate(city: str, p1: dict, p2: dict) -> dict | None:
         "participant_2": {
             "transport_price": price_2,
             "transport_type": offer_2["transport_type"],
+            "transport_duration_min": offer_2.get("duration_min"),           # новое
+            "transport_departure_time": offer_2.get("departure_time"),       # новое
+            "transport_arrival_time": offer_2.get("arrival_time"),           # новое
+            "transport_departure_date": offer_2.get("departure_date"),       # новое
+            "transport_arrival_date": offer_2.get("arrival_date"),           # новое
             "transport_checkout_url": offer_2["checkout_url"],
             "within_budget": price_2 <= p2["budget"],
             "vibe_match": round(v2, 2),
@@ -154,10 +167,26 @@ async def get_city_attractions(city: str, vibe_tags: list[str], limit: int = 3) 
             if not name or name in seen_names:
                 continue
             seen_names.add(name)
+
+            xid = props.get("xid")
+            description = None
+
+            # Получаем описание через get_place_details
+            if xid:
+                try:
+                    details = await get_place_details(xid)
+                    description = details.get("wikipedia_extracts", {}).get("text")
+                    if description and len(description) > 200:
+                        description = description[:200] + "..."
+                except Exception as e:
+                    print(f"Ошибка получения описания для {xid}: {e}")
+
             attractions.append({
                 "name": name,
                 "kinds": props.get("kinds"),
                 "rate": props.get("rate"),
+                "xid": xid,
+                "description": description,
             })
 
     attractions.sort(key=lambda a: a.get("rate") or 0, reverse=True)

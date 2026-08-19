@@ -1,3050 +1,2584 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Тревел-компромисс</title>
-
-<style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap');
-
-:root {
-  --orange: #fe5823;
-  --purple: #a180ff;
-  --lime: #d0fe1b;
-
-  --bg: #ffffff;
-  --paper: #ffffff;
-  --ink: #17131f;
-  --muted: #74707b;
-
-  --line: #e7e3ec;
-  --soft-purple: #f0ebff;
-  --soft-orange: #fff0eb;
-  --soft-lime: #f3ffd0;
-
-  --shadow: 0 25px 70px rgba(33, 20, 50, .10);
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  background: var(--bg);
-  color: var(--ink);
-  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
-}
-
-button,
-input {
-  font: inherit;
-}
-
-button {
-  cursor: pointer;
-}
-
-#api-base {
-  display: none;
-}
-
-#app {
-  min-height: 100vh;
-}
-
-/* =========================================================
-   GLOBAL
-========================================================= */
-
-.page,
-.form-page,
-.result-page {
-  min-height: 100vh;
-  position: relative;
-  overflow: hidden;
-}
-
-.shell {
-  width: min(1180px, calc(100% - 48px));
-  margin: 0 auto;
-  position: relative;
-  z-index: 2;
-}
-
-.topbar {
-  height: 88px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  font-weight: 700;
-  letter-spacing: -.03em;
-}
-
-.logo-mark {
-  width: 31px;
-  height: 31px;
-  border-radius: 9px;
-  background: var(--purple);
-  color: var(--ink);
-  display: grid;
-  place-items: center;
-  font-size: 14px;
-  font-weight: 800;
-  transform: rotate(-7deg);
-}
-
-.logo span {
-  font-size: 15px;
-}
-
-.step-counter {
-  background: var(--lime);
-  color: var(--ink);
-  padding: 8px 13px;
-  border-radius: 999px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .08em;
-}
-
-.eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  text-transform: uppercase;
-  letter-spacing: .13em;
-  font-size: 10px;
-  color: var(--muted);
-  margin-bottom: 24px;
-  font-weight: 700;
-}
-
-.eyebrow-dot {
-  width: 8px;
-  height: 8px;
-  background: var(--orange);
-  border-radius: 50%;
-}
-
-h1 {
-  font-family: "Playfair Display", Georgia, serif;
-  font-size: clamp(58px, 7vw, 102px);
-  line-height: .91;
-  letter-spacing: -.055em;
-  font-weight: 500;
-  margin: 0;
-}
-
-h1 em,
-h2 em {
-  color: var(--purple);
-  font-style: italic;
-}
-
-.lead {
-  max-width: 500px;
-  margin: 30px 0 38px;
-  color: var(--muted);
-  font-size: 16px;
-  line-height: 1.7;
-}
-
-.primary-btn {
-  border: 0;
-  background: var(--purple);
-  color: var(--ink);
-  border-radius: 14px;
-  padding: 17px 25px;
-  min-width: 210px;
-  font-weight: 700;
-  font-size: 14px;
-  transition: transform .2s, background .2s, box-shadow .2s;
-  box-shadow: 0 8px 0 #8062dd;
-}
-
-.primary-btn:hover {
-  transform: translateY(-3px);
-  background: var(--lime);
-  box-shadow: 0 8px 0 #9abb00;
-}
-
-.primary-btn:active {
-  transform: translateY(3px);
-  box-shadow: 0 3px 0 #8062dd;
-}
-
-.primary-btn:disabled {
-  opacity: .55;
-  cursor: wait;
-  transform: none;
-  box-shadow: none;
-}
-
-.secondary-btn {
-  border: 1px solid var(--line);
-  background: white;
-  color: var(--ink);
-  border-radius: 999px;
-  padding: 14px 20px;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.muted {
-  color: var(--muted);
-}
-
-.error {
-  color: #c83c22;
-  font-size: 13px;
-  margin-top: 15px;
-  font-weight: 600;
-}
-
-/* =========================================================
-   CREATE
-========================================================= */
-
-.hero-grid {
-  min-height: calc(100vh - 88px);
-  display: grid;
-  grid-template-columns: 1.08fr .92fr;
-  gap: 70px;
-  align-items: center;
-  padding: 40px 0 90px;
-}
-
-.travel-visual {
-  height: 560px;
-  border-radius: 38px;
-  background: var(--purple);
-  position: relative;
-  overflow: hidden;
-  box-shadow: var(--shadow);
-}
-
-.visual-image {
-  position: absolute;
-  inset: 0;
-
-  /*
-    Фото оставляем как декоративный слой.
-    API и логика проекта от него НЕ зависят.
-  */
-  background:
-    linear-gradient(
-      135deg,
-      rgba(161,128,255,.70),
-      rgba(254,88,35,.28)
-    ),
-    url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=85")
-    center/cover;
-}
-
-.visual-overlay {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(
-      circle at 25% 20%,
-      rgba(208,254,27,.9),
-      transparent 22%
-    ),
-    linear-gradient(
-      to top,
-      rgba(20,12,30,.58),
-      transparent 65%
-    );
-}
-
-.route-line {
-  position: absolute;
-  width: 280px;
-  height: 140px;
-  border-top: 2px solid white;
-  border-radius: 50%;
-  transform: rotate(-12deg);
-  top: 43%;
-  left: 25%;
-}
-
-.route-line::before,
-.route-line::after {
-  content: "";
-  position: absolute;
-  width: 11px;
-  height: 11px;
-  background: var(--lime);
-  border: 3px solid white;
-  border-radius: 50%;
-  top: -7px;
-}
-
-.route-line::before {
-  left: -5px;
-}
-
-.route-line::after {
-  right: -5px;
-}
-
-.visual-label {
-  position: absolute;
-  left: 28px;
-  bottom: 26px;
-  color: white;
-}
-
-.visual-label small {
-  display: block;
-  text-transform: uppercase;
-  letter-spacing: .14em;
-  font-size: 9px;
-  opacity: .8;
-  margin-bottom: 6px;
-}
-
-.visual-label strong {
-  font-family: "Playfair Display", serif;
-  font-size: 34px;
-  font-weight: 500;
-}
-
-/* =========================================================
-   FORM
-========================================================= */
-
-.form-shell {
-  width: min(920px, calc(100% - 40px));
-  margin: 0 auto;
-  padding: 25px 0 80px;
-}
-
-.form-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 25px 0 45px;
-}
-
-.form-header h2 {
-  font-family: "Playfair Display", serif;
-  font-size: clamp(40px, 6vw, 64px);
-  font-weight: 500;
-  line-height: .95;
-  letter-spacing: -.045em;
-  margin: 0;
-  max-width: 600px;
-}
-
-.form-header p {
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.6;
-  max-width: 280px;
-  margin: 5px 0 0;
-}
-
-.form-card {
-  background: var(--paper);
-  border: 2px solid var(--purple);
-  border-radius: 30px;
-  padding: clamp(25px, 5vw, 55px);
-  box-shadow: var(--shadow);
-}
-
-.field {
-  margin-bottom: 34px;
-}
-
-.field-label {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.field-label span:first-child {
-  font-weight: 700;
-  font-size: 13px;
-}
-
-.field-number {
-  color: var(--muted);
-  font-size: 10px;
-  letter-spacing: .1em;
-}
-
-.text-input {
-  width: 100%;
-  border: 0;
-  border-bottom: 2px solid var(--line);
-  background: transparent;
-  padding: 12px 0;
-  font-size: 20px;
-  color: var(--ink);
-  outline: none;
-  transition: border-color .2s;
-}
-
-.text-input:focus {
-  border-color: var(--orange);
-}
-
-.date-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 30px;
-}
-
-.date-input {
-  width: 100%;
-  padding: 18px;
-  border: 2px solid var(--line);
-  border-radius: 16px;
-  background: white;
-  color: var(--ink);
-  outline: none;
-}
-
-.date-input:focus {
-  border-color: var(--purple);
-}
-
-.tag-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-
-.tag {
-  border: 2px solid var(--line);
-  border-radius: 15px;
-  padding: 18px 16px;
-  background: white;
-  color: var(--ink);
-  text-align: left;
-  font-size: 13px;
-  transition: all .2s;
-  font-weight: 600;
-}
-
-.tag:hover {
-  border-color: var(--purple);
-  transform: translateY(-2px);
-}
-
-.tag.active {
-  background: var(--purple);
-  color: var(--ink);
-  border-color: var(--purple);
-  box-shadow: 4px 4px 0 var(--lime);
-}
-
-.tag-icon {
-  display: block;
-  font-size: 20px;
-  margin-bottom: 11px;
-  color: var(--orange);
-}
-
-.tag.active .tag-icon {
-  color: var(--ink);
-}
-
-.budget-wrap {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.budget-value {
-  min-width: 150px;
-  font-family: "Playfair Display", serif;
-  font-size: 28px;
-}
-
-input[type="range"] {
-  appearance: none;
-  width: 100%;
-  height: 5px;
-  border-radius: 10px;
-  background: var(--purple);
-  outline: none;
-}
-
-input[type="range"]::-webkit-slider-thumb {
-  appearance: none;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--orange);
-  border: 4px solid white;
-  box-shadow: 0 0 0 2px var(--orange);
-  cursor: pointer;
-}
-
-.submit-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 45px;
-}
-
-/* =========================================================
-   INVITE
-========================================================= */
-
-.center-page {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
-  background:
-    radial-gradient(circle at 10% 10%, #f0ebff, transparent 28%),
-    radial-gradient(circle at 90% 90%, #fff0eb, transparent 30%),
-    white;
-}
-
-.center-card {
-  width: min(780px, 100%);
-  background: white;
-  border: 2px solid var(--purple);
-  border-radius: 35px;
-  padding: clamp(30px, 6vw, 65px);
-  box-shadow: var(--shadow);
-  text-align: center;
-}
-
-.center-card h2 {
-  font-family: "Playfair Display", serif;
-  font-weight: 500;
-  font-size: clamp(44px, 6vw, 70px);
-  line-height: .95;
-  letter-spacing: -.05em;
-  margin: 10px 0 20px;
-}
-
-.center-card > p {
-  color: var(--muted);
-  max-width: 520px;
-  margin: 0 auto 40px;
-  line-height: 1.6;
-  font-size: 14px;
-}
-
-.invites {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-  text-align: left;
-}
-
-.invite {
-  border: 0;
-  border-radius: 20px;
-  padding: 22px;
-  background: var(--orange);
-}
-
-.invite:nth-child(2) {
-  background: var(--purple);
-}
-
-.invite-number {
-  font-size: 10px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  font-weight: 800;
-}
-
-.invite-link {
-  margin: 13px 0 18px;
-  font-size: 11px;
-  word-break: break-all;
-  line-height: 1.5;
-}
-
-.copy-btn {
-  border: 0;
-  background: white;
-  color: var(--ink);
-  padding: 10px 15px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.copy-btn:hover {
-  background: var(--lime);
-}
-
-/* =========================================================
-   WAITING
-========================================================= */
-
-.waiting {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background:
-    radial-gradient(circle at 50% 45%, #f0ebff 0%, white 48%);
-}
-
-.wait-card {
-  text-align: center;
-  width: min(700px, calc(100% - 40px));
-}
-
-.wait-orbit {
-  width: 220px;
-  height: 220px;
-  margin: 0 auto 45px;
-  border: 3px solid var(--purple);
-  border-radius: 50%;
-  position: relative;
-  animation: orbit 12s linear infinite;
-}
-
-.wait-orbit::before {
-  content: "✈";
-  position: absolute;
-  top: -15px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--lime);
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  display: grid;
-  place-items: center;
-  font-size: 17px;
-  animation: counterorbit 12s linear infinite;
-}
-
-.wait-orbit::after {
-  content: "";
-  position: absolute;
-  width: 14px;
-  height: 14px;
-  background: var(--orange);
-  border-radius: 50%;
-  top: 50%;
-  left: -8px;
-  transform: translateY(-50%);
-  box-shadow: 0 0 0 6px #fff0eb;
-}
-
-@keyframes orbit {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes counterorbit {
-  to {
-    transform: translateX(-50%) rotate(-360deg);
-  }
-}
-
-.wait-card h2 {
-  font-family: "Playfair Display", serif;
-  font-weight: 500;
-  font-size: clamp(44px, 7vw, 76px);
-  line-height: .95;
-  letter-spacing: -.05em;
-  margin: 0 0 18px;
-}
-
-.wait-card p {
-  color: var(--muted);
-  font-size: 14px;
-}
-
-.status-list {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 40px;
-  flex-wrap: wrap;
-}
-
-.status-pill {
-  background: white;
-  border: 2px solid var(--line);
-  padding: 12px 18px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.status-pill.done {
-  border-color: var(--lime);
-  background: var(--lime);
-}
-
-/* =========================================================
-   RESULT
-========================================================= */
-
-.result-shell {
-  width: min(1100px, calc(100% - 40px));
-  margin: 0 auto;
-  padding-bottom: 70px;
-}
-
-.result-heading {
-  padding: 55px 0 45px;
-}
-
-.result-heading h2 {
-  font-family: "Playfair Display", serif;
-  font-weight: 500;
-  font-size: clamp(50px, 8vw, 92px);
-  letter-spacing: -.055em;
-  line-height: .9;
-  margin: 0;
-}
-
-.result-heading p {
-  color: var(--muted);
-  margin: 22px 0 0;
-  font-size: 14px;
-}
-
-.result-hero {
-  min-height: 520px;
-  border-radius: 35px;
-  overflow: hidden;
-  position: relative;
-  color: white;
-  box-shadow: var(--shadow);
-  margin-bottom: 25px;
-  background: var(--purple);
-}
-
-.result-bg {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-}
-
-.result-bg::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(
-      to top,
-      rgba(30,16,42,.78),
-      rgba(30,16,42,.04) 72%
-    );
-}
-
-.result-content {
-  position: absolute;
-  inset: auto 45px 40px;
-  z-index: 2;
-}
-
-.match-badge {
-  display: inline-flex;
-  padding: 9px 14px;
-  border-radius: 999px;
-  background: var(--lime);
-  color: var(--ink);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  margin-bottom: 18px;
-}
-
-.result-city {
-  font-family: "Playfair Display", serif;
-  font-size: clamp(65px, 10vw, 125px);
-  line-height: .82;
-  letter-spacing: -.06em;
-  font-weight: 500;
-  margin: 0;
-}
-
-.result-sub {
-  margin-top: 20px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.result-chip {
-  padding: 8px 12px;
-  border-radius: 10px;
-  background: var(--orange);
-  color: white;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.result-chip:nth-child(2) {
-  background: var(--purple);
-  color: var(--ink);
-}
-
-.result-chip:nth-child(3) {
-  background: var(--lime);
-  color: var(--ink);
-}
-
-.metrics {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-bottom: 45px;
-}
-
-.metric {
-  background: white;
-  border: 2px solid var(--line);
-  border-radius: 18px;
-  padding: 16px;
-}
-
-.metric:nth-child(1) {
-  border-color: var(--purple);
-}
-
-.metric:nth-child(2) {
-  border-color: var(--orange);
-}
-
-.metric:nth-child(3) {
-  border-color: var(--lime);
-}
-
-.metric-label {
-  color: var(--muted);
-  text-transform: uppercase;
-  font-size: 9px;
-  letter-spacing: .12em;
-  margin-bottom: 10px;
-}
-
-.metric-value {
-  font-family: "Playfair Display", serif;
-  font-size: 25px;
-}
-
-.section-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 15px;
-}
-
-.section-title h3 {
-  font-family: "Playfair Display", serif;
-  font-size: 34px;
-  font-weight: 500;
-  margin: 0;
-}
-
-.section-title span {
-  color: var(--muted);
-  font-size: 11px;
-}
-
-.runners {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 15px;
-}
-
-.runner {
-  background: white;
-  border: 2px solid var(--purple);
-  border-radius: 20px;
-  padding: 17px;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 15px;
-  align-items: center;
-  transition: transform .2s, box-shadow .2s;
-}
-
-.runner.js-alt:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 0 var(--lime);
-}
-
-.runner:nth-child(2) {
-  border-color: var(--orange);
-}
-
-.runner-rank {
-  color: var(--muted);
-  font-size: 11px;
-  margin-bottom: 7px;
-}
-
-.runner-city {
-  font-family: "Playfair Display", serif;
-  font-size: 30px;
-}
-
-.runner-score {
-  font-family: "Playfair Display", serif;
-  font-size: 28px;
-  background: var(--lime);
-  padding: 5px 10px;
-  border-radius: 10px;
-  height: fit-content;
-}
-
-.hotel-box {
-  margin-top: 15px;
-  background: var(--orange);
-  color: white;
-  border-radius: 16px;
-  padding: 14px 16px;
-}
-
-.hotel-title {
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.hotel-meta {
-  margin-top: 6px;
-  font-size: 11px;
-  opacity: .9;
-}
-
-.bottom-note {
-  text-align: center;
-  margin-top: 46px;
-  padding-top: 32px;
-  border-top: 2px solid var(--line);
-}
-
-.bottom-note h3 {
-  font-family: "Playfair Display", serif;
-  font-size: 40px;
-  font-weight: 500;
-  margin: 0 0 12px;
-}
-
-.bottom-note p {
-  color: var(--muted);
-  font-size: 13px;
-}
-
-/* =========================================================
-   LOADING
-========================================================= */
-
-.loading {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.loading-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--orange);
-  animation: pulse 1s infinite alternate;
-}
-
-@keyframes pulse {
-  from {
-    opacity: .25;
-    transform: scale(.7);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
-@media (max-width: 800px) {
-
-  .shell {
-    width: min(100% - 30px, 600px);
-  }
-
-  .hero-grid {
-    grid-template-columns: 1fr;
-    gap: 35px;
-    padding-top: 25px;
-  }
-
-  .travel-visual {
-    height: 390px;
-    border-radius: 28px;
-  }
-
-  .form-header {
-    display: block;
-  }
-
-  .form-header p {
-    margin-top: 18px;
-  }
-
-  .tag-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .invites {
-    grid-template-columns: 1fr;
-  }
-
-  .metrics {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .runners {
-    grid-template-columns: 1fr;
-  }
-
-  .result-content {
-    inset: auto 25px 25px;
-  }
-
-  .result-hero {
-    min-height: 480px;
-    border-radius: 28px;
-  }
-}
-
-@media (max-width: 520px) {
-
-  .topbar {
-    height: 70px;
-  }
-
-  h1 {
-    font-size: 55px;
-  }
-
-  .date-grid {
-    grid-template-columns: 1fr;
-    gap: 15px;
-  }
-
-  .tag-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .form-card {
-    border-radius: 23px;
-    padding: 22px;
-  }
-
-  .metrics {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .metric {
-    padding: 17px;
-  }
-
-  .metric-value {
-    font-size: 20px;
-  }
-
-  .result-city {
-    font-size: 70px;
-  }
-}
-</style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Тревел-компромисс</title>
+
+    <style>
+        /* ----- ШРИФТЫ ----- */
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap');
+
+        /* ----- ПЕРЕМЕННЫЕ ----- */
+        :root {
+            --orange: #fe5823;
+            --purple: #a180ff;
+            --lime: #d0fe1b;
+            --bg: #ffffff;
+            --paper: #ffffff;
+            --ink: #17131f;
+            --muted: #74707b;
+            --line: #e7e3ec;
+            --shadow: 0 25px 70px rgba(33, 20, 50, .10);
+        }
+
+        /* ----- БАЗА ----- */
+        * {
+            box-sizing: border-box;
+            cursor: none;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            cursor: none;
+        }
+        button,
+        input {
+            font: inherit;
+            cursor: none;
+        }
+        button {
+            cursor: none;
+        }
+        a {
+            cursor: none;
+        }
+        #api-base {
+            display: none;
+        }
+        #app {
+            min-height: 100vh;
+        }
+
+        /* ============================================================
+           КАСТОМНЫЙ КУРСОР
+        ============================================================ */
+        .custom-cursor {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid var(--purple);
+            background: rgba(161, 128, 255, 0.08);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s ease, height 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+            will-change: transform, left, top;
+            backdrop-filter: blur(2px);
+        }
+        .custom-cursor-dot {
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--purple);
+            transform: translate(-50%, -50%);
+            transition: width 0.2s ease, height 0.2s ease;
+            will-change: transform, left, top;
+        }
+        .custom-cursor.hover {
+            width: 40px;
+            height: 40px;
+            background: rgba(161, 128, 255, 0.15);
+            border-color: var(--lime);
+            border-width: 2.5px;
+        }
+        .custom-cursor-dot.hover {
+            width: 6px;
+            height: 6px;
+            background: var(--lime);
+        }
+        .custom-cursor.click {
+            width: 28px;
+            height: 28px;
+            background: rgba(208, 254, 27, 0.2);
+            border-color: var(--lime);
+            transform: translate(-50%, -50%) scale(0.9);
+        }
+
+        /* ----- АНИМИРОВАННЫЙ ФОН (ГРАДИЕНТ) ----- */
+        .page {
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #f5f0ff 0%, #fff5f0 25%, #f0fff5 50%, #fff5f0 75%, #f5f0ff 100%);
+            background-size: 300% 300%;
+            animation: gradientMove 20s ease-in-out infinite;
+        }
+
+        @keyframes gradientMove {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* ----- МНОГО ПЛАВАЮЩИХ ТОЧЕК (20 шт!) ----- */
+        .floating-dots {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .floating-dot {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.08;
+            animation: floatDot 12s ease-in-out infinite;
+        }
+        .floating-dot:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 5%;
+            left: 3%;
+            background: var(--purple);
+            animation-delay: 0s;
+            animation-duration: 14s;
+        }
+        .floating-dot:nth-child(2) {
+            width: 50px;
+            height: 50px;
+            top: 15%;
+            right: 8%;
+            background: var(--orange);
+            animation-delay: 1s;
+            animation-duration: 11s;
+        }
+        .floating-dot:nth-child(3) {
+            width: 100px;
+            height: 100px;
+            bottom: 25%;
+            left: 5%;
+            background: var(--lime);
+            opacity: 0.05;
+            animation-delay: 2s;
+            animation-duration: 16s;
+        }
+        .floating-dot:nth-child(4) {
+            width: 35px;
+            height: 35px;
+            top: 45%;
+            right: 15%;
+            background: var(--purple);
+            animation-delay: 0.5s;
+            animation-duration: 9s;
+        }
+        .floating-dot:nth-child(5) {
+            width: 65px;
+            height: 65px;
+            top: 25%;
+            right: 35%;
+            background: var(--orange);
+            opacity: 0.06;
+            animation-delay: 3s;
+            animation-duration: 13s;
+        }
+        .floating-dot:nth-child(6) {
+            width: 40px;
+            height: 40px;
+            bottom: 15%;
+            right: 25%;
+            background: var(--lime);
+            opacity: 0.07;
+            animation-delay: 1.5s;
+            animation-duration: 10s;
+        }
+        .floating-dot:nth-child(7) {
+            width: 70px;
+            height: 70px;
+            top: 60%;
+            left: 20%;
+            background: var(--purple);
+            opacity: 0.04;
+            animation-delay: 2.5s;
+            animation-duration: 15s;
+        }
+        .floating-dot:nth-child(8) {
+            width: 25px;
+            height: 25px;
+            top: 10%;
+            left: 50%;
+            background: var(--orange);
+            animation-delay: 4s;
+            animation-duration: 8s;
+        }
+        .floating-dot:nth-child(9) {
+            width: 55px;
+            height: 55px;
+            bottom: 40%;
+            right: 5%;
+            background: var(--lime);
+            opacity: 0.05;
+            animation-delay: 0.8s;
+            animation-duration: 12s;
+        }
+        .floating-dot:nth-child(10) {
+            width: 90px;
+            height: 90px;
+            top: 75%;
+            left: 40%;
+            background: var(--purple);
+            opacity: 0.03;
+            animation-delay: 3.5s;
+            animation-duration: 18s;
+        }
+        .floating-dot:nth-child(11) {
+            width: 30px;
+            height: 30px;
+            top: 30%;
+            left: 10%;
+            background: var(--orange);
+            animation-delay: 5s;
+            animation-duration: 7s;
+        }
+        .floating-dot:nth-child(12) {
+            width: 45px;
+            height: 45px;
+            bottom: 5%;
+            left: 30%;
+            background: var(--purple);
+            opacity: 0.06;
+            animation-delay: 2s;
+            animation-duration: 11s;
+        }
+        .floating-dot:nth-child(13) {
+            width: 75px;
+            height: 75px;
+            top: 50%;
+            left: 60%;
+            background: var(--lime);
+            opacity: 0.04;
+            animation-delay: 1.2s;
+            animation-duration: 14s;
+        }
+        .floating-dot:nth-child(14) {
+            width: 20px;
+            height: 20px;
+            top: 80%;
+            right: 45%;
+            background: var(--orange);
+            animation-delay: 4.5s;
+            animation-duration: 6s;
+        }
+        .floating-dot:nth-child(15) {
+            width: 60px;
+            height: 60px;
+            bottom: 60%;
+            left: 75%;
+            background: var(--purple);
+            opacity: 0.05;
+            animation-delay: 0.3s;
+            animation-duration: 13s;
+        }
+        .floating-dot:nth-child(16) {
+            width: 40px;
+            height: 40px;
+            top: 5%;
+            right: 55%;
+            background: var(--lime);
+            opacity: 0.06;
+            animation-delay: 3s;
+            animation-duration: 9s;
+        }
+        .floating-dot:nth-child(17) {
+            width: 85px;
+            height: 85px;
+            bottom: 30%;
+            left: 50%;
+            background: var(--orange);
+            opacity: 0.03;
+            animation-delay: 2.2s;
+            animation-duration: 17s;
+        }
+        .floating-dot:nth-child(18) {
+            width: 30px;
+            height: 30px;
+            top: 65%;
+            right: 60%;
+            background: var(--purple);
+            animation-delay: 1.8s;
+            animation-duration: 8s;
+        }
+        .floating-dot:nth-child(19) {
+            width: 50px;
+            height: 50px;
+            top: 20%;
+            left: 80%;
+            background: var(--lime);
+            opacity: 0.05;
+            animation-delay: 4.2s;
+            animation-duration: 10s;
+        }
+        .floating-dot:nth-child(20) {
+            width: 70px;
+            height: 70px;
+            bottom: 10%;
+            right: 70%;
+            background: var(--purple);
+            opacity: 0.04;
+            animation-delay: 0.7s;
+            animation-duration: 15s;
+        }
+
+        @keyframes floatDot {
+            0%,
+            100% {
+                transform: translateY(0px) scale(1) rotate(0deg);
+            }
+            25% {
+                transform: translateY(-30px) scale(1.1) rotate(5deg);
+            }
+            50% {
+                transform: translateY(-10px) scale(1.05) rotate(-3deg);
+            }
+            75% {
+                transform: translateY(-40px) scale(1.15) rotate(3deg);
+            }
+        }
+
+        /* ----- ПАРЯЩИЕ КАРТОЧКИ ----- */
+        .float-card {
+            animation: floatCard 6s ease-in-out infinite;
+        }
+        .float-card-2 {
+            animation: floatCard 7s ease-in-out infinite 1s;
+        }
+        .float-card-3 {
+            animation: floatCard 5s ease-in-out infinite 2s;
+        }
+
+        @keyframes floatCard {
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-8px) rotate(0.5deg);
+            }
+        }
+
+        /* ----- ВРАЩАЮЩАЯСЯ ИКОНКА ----- */
+        .spin-slow {
+            animation: spinSlow 12s linear infinite;
+        }
+        @keyframes spinSlow {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ----- ПУЛЬСИРУЮЩИЙ КРУГ ----- */
+        .pulse-ring {
+            animation: pulseRing 2.5s ease-in-out infinite;
+        }
+        @keyframes pulseRing {
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(161, 128, 255, 0.2);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 0 20px rgba(161, 128, 255, 0);
+                transform: scale(1.02);
+            }
+        }
+
+        /* ----- ШИМЕР НА КНОПКАХ ----- */
+        .shimmer-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        .shimmer-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(105deg,
+                    transparent 40%,
+                    rgba(255, 255, 255, 0.25) 50%,
+                    transparent 60%);
+            transform: translateX(-100%);
+            animation: shimmerRun 3.5s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes shimmerRun {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        /* ----- ПОДЪЁМ КАРТОЧЕК ПРИ НАВЕДЕНИИ ----- */
+        .card-lift {
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
+        }
+        .card-lift:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 50px rgba(33, 20, 50, 0.10);
+        }
+
+        /* ----- СТЕКЛЯННЫЙ ЭФФЕКТ ----- */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: background 0.4s ease, transform 0.3s ease;
+        }
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.88);
+            transform: scale(1.01);
+        }
+
+        /* ----- ДЕКОРАТИВНАЯ ЛИНИЯ ----- */
+        .deco-line {
+            width: 60px;
+            height: 2px;
+            background: var(--purple);
+            margin: 20px 0;
+            opacity: 0.3;
+            animation: decoLinePulse 3s ease-in-out infinite;
+        }
+        @keyframes decoLinePulse {
+            0%,
+            100% {
+                width: 60px;
+                opacity: 0.3;
+            }
+            50% {
+                width: 120px;
+                opacity: 0.6;
+            }
+        }
+
+        /* ----- ЭЛЕМЕНТЫ ПО БОКАМ НА СТРАНИЦЕ ПРИГЛАШЕНИЙ ----- */
+        .side-element {
+            position: fixed;
+            font-size: 56px;
+            opacity: 0.15;
+            z-index: 0;
+            animation: sidePeek 9s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .side-element-1 {
+            left: -30px;
+            top: 15%;
+            animation-delay: 0s;
+            transform: rotate(-15deg);
+        }
+        .side-element-2 {
+            right: -30px;
+            bottom: 20%;
+            animation-delay: 2.5s;
+            transform: rotate(15deg) scaleX(-1);
+        }
+        .side-element-3 {
+            left: -20px;
+            bottom: 35%;
+            animation-delay: 5s;
+            transform: rotate(-10deg);
+            font-size: 44px;
+        }
+        .side-element-4 {
+            right: -20px;
+            top: 35%;
+            animation-delay: 7s;
+            transform: rotate(10deg) scaleX(-1);
+            font-size: 44px;
+        }
+
+        @keyframes sidePeek {
+            0% {
+                transform: translateX(0) rotate(-15deg) scale(0.7);
+                opacity: 0.03;
+            }
+            20% {
+                transform: translateX(50px) rotate(-5deg) scale(1);
+                opacity: 0.20;
+            }
+            40% {
+                transform: translateX(70px) rotate(0deg) scale(1.05);
+                opacity: 0.28;
+            }
+            60% {
+                transform: translateX(40px) rotate(5deg) scale(1);
+                opacity: 0.15;
+            }
+            100% {
+                transform: translateX(0) rotate(-15deg) scale(0.7);
+                opacity: 0.03;
+            }
+        }
+
+        .side-element-2 {
+            animation: sidePeekRight 9s ease-in-out infinite;
+        }
+        .side-element-3 {
+            animation: sidePeekLeft 9s ease-in-out infinite;
+        }
+        .side-element-4 {
+            animation: sidePeekRight2 9s ease-in-out infinite;
+        }
+
+        @keyframes sidePeekRight {
+            0% {
+                transform: translateX(0) rotate(15deg) scaleX(-1) scale(0.7);
+                opacity: 0.03;
+            }
+            20% {
+                transform: translateX(-50px) rotate(5deg) scaleX(-1) scale(1);
+                opacity: 0.20;
+            }
+            40% {
+                transform: translateX(-70px) rotate(0deg) scaleX(-1) scale(1.05);
+                opacity: 0.28;
+            }
+            60% {
+                transform: translateX(-40px) rotate(-5deg) scaleX(-1) scale(1);
+                opacity: 0.15;
+            }
+            100% {
+                transform: translateX(0) rotate(15deg) scaleX(-1) scale(0.7);
+                opacity: 0.03;
+            }
+        }
+
+        @keyframes sidePeekLeft {
+            0% {
+                transform: translateX(0) rotate(-10deg) scale(0.6);
+                opacity: 0.03;
+            }
+            20% {
+                transform: translateX(40px) rotate(-3deg) scale(1);
+                opacity: 0.18;
+            }
+            40% {
+                transform: translateX(55px) rotate(0deg) scale(1.05);
+                opacity: 0.25;
+            }
+            60% {
+                transform: translateX(30px) rotate(3deg) scale(1);
+                opacity: 0.12;
+            }
+            100% {
+                transform: translateX(0) rotate(-10deg) scale(0.6);
+                opacity: 0.03;
+            }
+        }
+
+        @keyframes sidePeekRight2 {
+            0% {
+                transform: translateX(0) rotate(10deg) scaleX(-1) scale(0.6);
+                opacity: 0.03;
+            }
+            20% {
+                transform: translateX(-40px) rotate(3deg) scaleX(-1) scale(1);
+                opacity: 0.18;
+            }
+            40% {
+                transform: translateX(-55px) rotate(0deg) scaleX(-1) scale(1.05);
+                opacity: 0.25;
+            }
+            60% {
+                transform: translateX(-30px) rotate(-3deg) scaleX(-1) scale(1);
+                opacity: 0.12;
+            }
+            100% {
+                transform: translateX(0) rotate(10deg) scaleX(-1) scale(0.6);
+                opacity: 0.03;
+            }
+        }
+
+
+        /* ----- ОБЩИЕ КОМПОНЕНТЫ ----- */
+        .shell {
+            width: min(1180px, calc(100% - 48px));
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+        .topbar {
+            height: 88px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            font-weight: 700;
+            letter-spacing: -.03em;
+        }
+        .logo-mark {
+            width: 31px;
+            height: 31px;
+            border-radius: 9px;
+            background: var(--purple);
+            color: var(--ink);
+            display: grid;
+            place-items: center;
+            font-size: 14px;
+            font-weight: 800;
+            transform: rotate(-7deg);
+            transition: transform 0.3s ease;
+        }
+        .logo-mark:hover {
+            transform: rotate(7deg) scale(1.1);
+        }
+        .logo span {
+            font-size: 15px;
+        }
+        .step-counter {
+            background: var(--lime);
+            color: var(--ink);
+            padding: 8px 13px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .08em;
+        }
+        .eyebrow {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            text-transform: uppercase;
+            letter-spacing: .13em;
+            font-size: 10px;
+            color: var(--muted);
+            margin-bottom: 24px;
+            font-weight: 700;
+        }
+        .eyebrow-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--orange);
+            border-radius: 50%;
+            animation: pulseDot 2s ease-in-out infinite;
+        }
+        @keyframes pulseDot {
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.5);
+                opacity: 0.5;
+            }
+        }
+
+        h1 {
+            font-family: "Playfair Display", Georgia, serif;
+            font-size: clamp(58px, 7vw, 102px);
+            line-height: .91;
+            letter-spacing: -.055em;
+            font-weight: 500;
+            margin: 0;
+        }
+        h1 em,
+        h2 em {
+            color: var(--purple);
+            font-style: italic;
+        }
+        .lead {
+            max-width: 500px;
+            margin: 30px 0 38px;
+            color: var(--muted);
+            font-size: 16px;
+            line-height: 1.7;
+        }
+        .primary-btn {
+            border: 0;
+            background: var(--purple);
+            color: var(--ink);
+            border-radius: 14px;
+            padding: 17px 25px;
+            min-width: 210px;
+            font-weight: 700;
+            font-size: 14px;
+            transition: transform .2s, background .2s, box-shadow .2s;
+            box-shadow: 0 8px 0 #8062dd;
+        }
+        .primary-btn:hover {
+            transform: translateY(-3px);
+            background: var(--lime);
+            box-shadow: 0 8px 0 #9abb00;
+        }
+        .primary-btn:disabled {
+            opacity: .55;
+            cursor: wait;
+            transform: none;
+            box-shadow: none;
+        }
+        .secondary-btn {
+            border: 1px solid var(--line);
+            background: white;
+            color: var(--ink);
+            border-radius: 999px;
+            padding: 14px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .secondary-btn:hover {
+            background: var(--purple);
+            color: white;
+            border-color: var(--purple);
+        }
+        .muted {
+            color: var(--muted);
+        }
+        .error {
+            color: #c83c22;
+            font-size: 13px;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+
+        /* ----- ГЛАВНАЯ СТРАНИЦА ----- */
+        .hero-grid {
+            min-height: calc(100vh - 88px);
+            display: grid;
+            grid-template-columns: 1.08fr .92fr;
+            gap: 70px;
+            align-items: center;
+            padding: 40px 0 90px;
+            position: relative;
+            z-index: 2;
+        }
+        .travel-visual {
+            height: 620px;
+            border-radius: 38px;
+            background: var(--purple);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.5s ease, box-shadow 0.5s ease;
+        }
+        .travel-visual:hover {
+            transform: scale(1.01);
+            box-shadow: 0 30px 80px rgba(33, 20, 50, 0.15);
+        }
+        .visual-image {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(161, 128, 255, .70), rgba(254, 88, 35, .28)),
+                url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=85") center/cover;
+            transition: transform 0.5s ease;
+        }
+        .travel-visual:hover .visual-image {
+            transform: scale(1.05);
+        }
+        .visual-overlay {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 25% 20%, rgba(208, 254, 27, .9), transparent 22%),
+                linear-gradient(to top, rgba(20, 12, 30, .58), transparent 65%);
+        }
+        .route-line {
+            position: absolute;
+            width: 280px;
+            height: 140px;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            transform: rotate(-12deg);
+            top: 43%;
+            left: 25%;
+            animation: routePulse 4s ease-in-out infinite;
+        }
+        @keyframes routePulse {
+            0%,
+            100% {
+                opacity: 0.6;
+                transform: rotate(-12deg) scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: rotate(-12deg) scale(1.05);
+            }
+        }
+        .route-line::before,
+        .route-line::after {
+            content: "";
+            position: absolute;
+            width: 11px;
+            height: 11px;
+            background: var(--lime);
+            border: 3px solid white;
+            border-radius: 50%;
+            top: -7px;
+        }
+        .route-line::before {
+            left: -5px;
+            animation: dotMove 3s ease-in-out infinite;
+        }
+        .route-line::after {
+            right: -5px;
+            animation: dotMove 3s ease-in-out infinite 1.5s;
+        }
+        @keyframes dotMove {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            50% {
+                transform: translateX(20px);
+            }
+        }
+        .visual-label {
+            position: absolute;
+            left: 28px;
+            bottom: 26px;
+            color: white;
+        }
+        .visual-label small {
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: .14em;
+            font-size: 9px;
+            opacity: .8;
+            margin-bottom: 6px;
+        }
+        .visual-label strong {
+            font-family: "Playfair Display", serif;
+            font-size: 34px;
+            font-weight: 500;
+        }
+
+        /* ----- ФОРМА ----- */
+        .form-shell {
+            width: min(920px, calc(100% - 40px));
+            margin: 0 auto;
+            padding: 25px 0 80px;
+        }
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 25px 0 45px;
+        }
+        .form-header h2 {
+            font-family: "Playfair Display", serif;
+            font-size: clamp(40px, 6vw, 64px);
+            font-weight: 500;
+            line-height: .95;
+            letter-spacing: -.045em;
+            margin: 0;
+            max-width: 600px;
+        }
+        .form-header p {
+            display: none;
+        }
+        .form-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--purple);
+            border-radius: 30px;
+            padding: clamp(25px, 5vw, 55px);
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .form-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 30px 80px rgba(33, 20, 50, 0.12);
+        }
+        .field {
+            margin-bottom: 34px;
+        }
+        .field-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .field-label span:first-child {
+            font-weight: 700;
+            font-size: 13px;
+        }
+        .field-number {
+            color: var(--muted);
+            font-size: 10px;
+            letter-spacing: .1em;
+        }
+        .text-input {
+            width: 100%;
+            border: 0;
+            border-bottom: 2px solid var(--line);
+            background: transparent;
+            padding: 12px 0;
+            font-size: 20px;
+            color: var(--ink);
+            outline: none;
+            transition: border-color .2s;
+        }
+        .text-input:focus {
+            border-color: var(--orange);
+        }
+        .date-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        .date-input {
+            width: 100%;
+            padding: 18px;
+            border: 2px solid var(--line);
+            border-radius: 16px;
+            background: white;
+            color: var(--ink);
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        .date-input:focus {
+            border-color: var(--purple);
+            box-shadow: 0 0 0 4px rgba(161, 128, 255, 0.1);
+        }
+        .tag-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .tag {
+            border: 2px solid var(--line);
+            border-radius: 15px;
+            padding: 18px 16px;
+            background: white;
+            color: var(--ink);
+            text-align: left;
+            font-size: 13px;
+            transition: all .3s cubic-bezier(0.22, 1, 0.36, 1);
+            font-weight: 600;
+        }
+        .tag:hover {
+            border-color: var(--purple);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(161, 128, 255, 0.1);
+        }
+        .tag.active {
+            background: var(--purple);
+            color: var(--ink);
+            border-color: var(--purple);
+            box-shadow: 4px 4px 0 var(--lime);
+        }
+        .tag-icon {
+            display: block;
+            font-size: 20px;
+            margin-bottom: 11px;
+            color: var(--orange);
+        }
+        .tag.active .tag-icon {
+            color: var(--ink);
+        }
+        .budget-wrap {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .budget-value {
+            min-width: 150px;
+            font-family: "Playfair Display", serif;
+            font-size: 28px;
+        }
+        input[type="range"] {
+            appearance: none;
+            width: 100%;
+            height: 5px;
+            border-radius: 10px;
+            background: var(--purple);
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--orange);
+            border: 4px solid white;
+            box-shadow: 0 0 0 2px var(--orange), 0 4px 12px rgba(254, 88, 35, 0.3);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+        .submit-row {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 45px;
+        }
+
+        /* ----- ПРИГЛАШЕНИЕ ----- */
+        .center-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 2;
+        }
+        .center-card {
+            width: min(780px, 100%);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--purple);
+            border-radius: 35px;
+            padding: clamp(30px, 6vw, 65px);
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .center-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 30px 80px rgba(33, 20, 50, 0.12);
+        }
+        .center-card h2 {
+            font-family: "Playfair Display", serif;
+            font-weight: 500;
+            font-size: clamp(44px, 6vw, 70px);
+            line-height: .95;
+            letter-spacing: -.05em;
+            margin: 10px 0 20px;
+        }
+        .center-card>p {
+            color: var(--muted);
+            max-width: 520px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+        .invites {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            text-align: left;
+        }
+        .invite {
+            border: 0;
+            border-radius: 20px;
+            padding: 22px;
+            background: var(--orange);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .invite:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(254, 88, 35, 0.2);
+        }
+        .invite:nth-child(2) {
+            background: var(--purple);
+        }
+        .invite:nth-child(2):hover {
+            box-shadow: 0 12px 30px rgba(161, 128, 255, 0.2);
+        }
+        .invite-number {
+            font-size: 10px;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            font-weight: 800;
+        }
+        .invite-link {
+            margin: 13px 0 18px;
+            font-size: 11px;
+            word-break: break-all;
+            line-height: 1.5;
+        }
+        .copy-btn {
+            border: 0;
+            background: white;
+            color: var(--ink);
+            padding: 10px 15px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+        .copy-btn:hover {
+            background: var(--lime);
+            transform: scale(1.05);
+        }
+
+        /* ----- ОЖИДАНИЕ ----- */
+        .waiting {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+        }
+        .wait-card {
+            text-align: left;
+            width: min(700px, calc(100% - 40px));
+            position: relative;
+            z-index: 3;
+        }
+        .wait-orbit {
+            width: 220px;
+            height: 220px;
+            margin: 0 auto 45px;
+            border: 3px solid var(--purple);
+            border-radius: 50%;
+            position: relative;
+            animation: orbit 12s linear infinite;
+        }
+        .wait-orbit::before {
+            content: "✈";
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--lime);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: grid;
+            place-items: center;
+            font-size: 17px;
+            animation: counterorbit 12s linear infinite;
+            box-shadow: 0 4px 20px rgba(208, 254, 27, 0.3);
+        }
+        .wait-orbit::after {
+            content: "";
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: var(--orange);
+            border-radius: 50%;
+            top: 50%;
+            left: -8px;
+            transform: translateY(-50%);
+            box-shadow: 0 0 0 6px #fff0eb, 0 0 20px rgba(254, 88, 35, 0.2);
+        }
+        @keyframes orbit {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        @keyframes counterorbit {
+            to {
+                transform: translateX(-50%) rotate(-360deg);
+            }
+        }
+        .wait-card h2 {
+            font-family: "Playfair Display", serif;
+            font-weight: 500;
+            font-size: clamp(44px, 7vw, 76px);
+            line-height: .95;
+            letter-spacing: -.05em;
+            margin: 0 0 18px;
+        }
+        .wait-card p {
+            color: var(--muted);
+            font-size: 14px;
+        }
+        .status-list {
+            display: flex;
+            gap: 12px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+        .status-pill {
+            background: white;
+            border: 2px solid var(--line);
+            padding: 12px 18px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            transition: all 0.5s ease;
+        }
+        .status-pill.done {
+            border-color: var(--lime);
+            background: var(--lime);
+            transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(208, 254, 27, 0.2);
+        }
+
+        /* ----- РЕЗУЛЬТАТЫ ----- */
+        .result-shell {
+            width: min(1100px, calc(100% - 40px));
+            margin: 0 auto;
+            padding-bottom: 60px;
+        }
+        .result-heading {
+            padding: 25px 0 35px;
+        }
+        .result-heading h2 {
+            font-family: "Playfair Display", serif;
+            font-weight: 500;
+            font-size: clamp(50px, 8vw, 92px);
+            letter-spacing: -.055em;
+            line-height: .9;
+            margin: 0;
+        }
+        .result-heading p {
+            color: var(--muted);
+            margin: 22px 0 0;
+            font-size: 14px;
+            max-width: 600px;
+        }
+        .result-hero {
+            min-height: 520px;
+            border-radius: 35px;
+            overflow: hidden;
+            position: relative;
+            color: white;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+            background: var(--purple);
+            transition: transform 0.5s ease, box-shadow 0.5s ease;
+        }
+        .result-hero:hover {
+            transform: scale(1.005);
+            box-shadow: 0 30px 80px rgba(33, 20, 50, 0.15);
+        }
+        .result-bg {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.5s ease;
+        }
+        .result-hero:hover .result-bg {
+            transform: scale(1.02);
+        }
+        .result-bg::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(30, 16, 42, .78), rgba(30, 16, 42, .04) 72%);
+        }
+        .result-content {
+            position: absolute;
+            inset: auto 45px 40px;
+            z-index: 2;
+        }
+        .match-badge {
+            display: inline-flex;
+            padding: 9px 14px;
+            border-radius: 999px;
+            background: var(--lime);
+            color: var(--ink);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+            animation: badgePulse 3s ease-in-out infinite;
+        }
+        @keyframes badgePulse {
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(208, 254, 27, 0);
+            }
+            50% {
+                box-shadow: 0 0 0 15px rgba(208, 254, 27, 0.08);
+            }
+        }
+        .result-city {
+            font-family: "Playfair Display", serif;
+            font-size: clamp(65px, 10vw, 125px);
+            line-height: .82;
+            letter-spacing: -.06em;
+            font-weight: 500;
+            margin: 0;
+        }
+        .result-sub {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .result-chip {
+            padding: 8px 12px;
+            border-radius: 10px;
+            background: var(--orange);
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            transition: transform 0.3s ease;
+        }
+        .result-chip:hover {
+            transform: translateY(-2px);
+        }
+        .result-chip:nth-child(2) {
+            background: var(--purple);
+            color: var(--ink);
+        }
+        .result-chip:nth-child(3) {
+            background: var(--lime);
+            color: var(--ink);
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 45px;
+        }
+        .metric {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            border: 2px solid var(--line);
+            border-radius: 20px;
+            padding: 20px;
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .metric:hover {
+            transform: translateY(-4px) scale(1.01);
+            border-color: var(--purple);
+            box-shadow: 0 12px 40px rgba(161, 128, 255, 0.1);
+        }
+        .metric:nth-child(1) {
+            border-color: var(--purple);
+        }
+        .metric:nth-child(2) {
+            border-color: var(--orange);
+        }
+        .metric:nth-child(3) {
+            border-color: var(--lime);
+        }
+        .metric-label {
+            color: var(--muted);
+            text-transform: uppercase;
+            font-size: 9px;
+            letter-spacing: .12em;
+            margin-bottom: 10px;
+        }
+        .metric-value {
+            font-family: "Playfair Display", serif;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 20px;
+        }
+        .section-title h3 {
+            font-family: "Playfair Display", serif;
+            font-size: 34px;
+            font-weight: 500;
+            margin: 0;
+        }
+        .section-title span {
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .runners {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        .runner {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            border: 2px solid var(--purple);
+            border-radius: 22px;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 15px;
+            align-items: center;
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .runner:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(161, 128, 255, 0.1);
+        }
+        .runner.js-alt {
+            cursor: pointer;
+        }
+        .runner.js-alt:hover {
+            transform: translateY(-6px) scale(1.01);
+            box-shadow: 0 0 0 4px var(--lime), 0 20px 60px rgba(161, 128, 255, 0.2);
+            border-color: var(--lime);
+            background: rgba(208, 254, 27, 0.05);
+        }
+        .runner:nth-child(2) {
+            border-color: var(--orange);
+        }
+        .runner-rank {
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 7px;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+        .runner-city {
+            font-family: "Playfair Display", serif;
+            font-size: 30px;
+        }
+        .runner-score {
+            font-family: "Playfair Display", serif;
+            font-size: 28px;
+            background: var(--lime);
+            padding: 5px 10px;
+            border-radius: 10px;
+            height: fit-content;
+            font-weight: 600;
+        }
+
+        .hotel-box {
+            margin-top: 15px;
+            background: var(--orange);
+            color: white;
+            border-radius: 18px;
+            padding: 18px 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .hotel-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(254, 88, 35, 0.2);
+        }
+        .hotel-title {
+            font-size: 14px;
+            font-weight: 800;
+        }
+        .hotel-meta {
+            margin-top: 6px;
+            font-size: 11px;
+            opacity: .9;
+        }
+        .hotel-box .copy-btn {
+            display: inline-block;
+        }
+
+        .bottom-note {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 2px solid var(--line);
+        }
+        .bottom-note h3 {
+            font-family: "Playfair Display", serif;
+            font-size: 40px;
+            font-weight: 500;
+            margin: 0 0 12px;
+        }
+        .bottom-note p {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        /* ----- ЗАГРУЗКА ----- */
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+        .loading-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--orange);
+            animation: pulse 1s infinite alternate;
+        }
+        @keyframes pulse {
+            from {
+                opacity: .25;
+                transform: scale(.7);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* ----- ВАЛИДАЦИЯ ----- */
+        .text-input.error,
+        .date-input.error {
+            border-color: #c83c22 !important;
+            background: #fff0eb;
+        }
+        .text-input.valid,
+        .date-input.valid {
+            border-color: #4caf50 !important;
+        }
+        .error-message {
+            color: #c83c22;
+            font-size: 13px;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+        .hint-message {
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        /* ----- АДАПТИВ ----- */
+        @media (max-width: 800px) {
+            .shell {
+                width: min(100% - 30px, 600px);
+            }
+            .hero-grid {
+                grid-template-columns: 1fr;
+                gap: 35px;
+                padding-top: 25px;
+            }
+            .travel-visual {
+                height: 420px;
+                border-radius: 28px;
+            }
+            .form-header {
+                display: block;
+            }
+            .tag-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .invites {
+                grid-template-columns: 1fr;
+            }
+            .metrics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .runners {
+                grid-template-columns: 1fr;
+            }
+            .result-content {
+                inset: auto 25px 25px;
+            }
+            .result-hero {
+                min-height: 480px;
+                border-radius: 28px;
+            }
+            .side-element {
+                display: none;
+            }
+        }
+        @media (max-width: 520px) {
+            .topbar {
+                height: 70px;
+            }
+            h1 {
+                font-size: 55px;
+            }
+            .date-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            .tag-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .form-card {
+                border-radius: 23px;
+                padding: 22px;
+            }
+            .metrics {
+                grid-template-columns: 1fr 1fr;
+            }
+            .metric {
+                padding: 17px;
+            }
+            .metric-value {
+                font-size: 20px;
+            }
+            .result-city {
+                font-size: 70px;
+            }
+            .section-title h3 {
+                font-size: 26px;
+            }
+        }
+    </style>
 </head>
 
 <body>
-
-<input id="api-base" value="http://localhost:8000">
-
-<div id="app"></div>
-
-<script>
-
-/* =========================================================
-   API
-   НЕ МЕНЯЕМ ENDPOINTS И ФОРМАТЫ ДАННЫХ
-========================================================= */
-
-const app = document.getElementById('app');
-const apiBaseInput = document.getElementById('api-base');
-
-function apiBase() {
-  return apiBaseInput.value.replace(/\/$/, '');
-}
-
-const VIBE_TAGS = [
-  'расслабон',
-  'движ',
-  'культура',
-  'еда',
-  'природа',
-  'бюджет'
-];
-
-const MUST_HAVES = [
-  'no_transfers',
-  'budget_stay',
-  'food_nearby'
-];
-
-const VIBE_INFO = {
-  'расслабон': ['☁', 'Спокойствие'],
-  'движ': ['↗', 'Приключения'],
-  'культура': ['◈', 'Культура'],
-  'еда': ['✦', 'Еда'],
-  'природа': ['⌁', 'Природа'],
-  'бюджет': ['₽', 'Бюджет']
-};
-
-const MUST_INFO = {
-  no_transfers: ['→', 'Без пересадок'],
-  budget_stay: ['⌂', 'Недорогое жильё'],
-  food_nearby: ['✦', 'Еда рядом']
-};
-
-
-/* =========================================================
-   ROUTER
-========================================================= */
-
-function route() {
-
-  const hash = location.hash.slice(2);
-  const parts = hash.split('/').filter(Boolean);
-
-  if (
-    parts[0] === 'join' &&
-    parts[1] &&
-    parts[2]
-  ) {
-    return renderJoin(
-      parts[1],
-      parts[2]
-    );
-  }
-
-  if (
-    parts[0] === 'wait' &&
-    parts[1]
-  ) {
-    return renderWait(parts[1]);
-  }
-
-  if (
-    parts[0] === 'result' &&
-    parts[1]
-  ) {
-    return renderResult(parts[1]);
-  }
-
-  return renderCreate();
-}
-
-window.addEventListener(
-  'hashchange',
-  route
-);
-
-
-/* =========================================================
-   API
-========================================================= */
-
-async function api(path, opts) {
-
-  const res = await fetch(
-    apiBase() + path,
-    {
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      ...opts
-    }
-  );
-
-  if (!res.ok) {
-
-    let msg = res.status;
-
-    try {
-      msg =
-        (await res.json()).message ||
-        msg;
-    } catch (e) {}
-
-    throw new Error(msg);
-  }
-
-  return res.json();
-}
-
-
-/* =========================================================
-   CREATE
-========================================================= */
-
-function renderCreate() {
-
-  app.innerHTML = `
-
-    <div class="page">
-
-      <div class="shell">
-
-        <header class="topbar">
-
-          <div class="logo">
-
-            <div class="logo-mark">
-              ↗
-            </div>
-
-            <span>
-              тревел-компромисс
-            </span>
-
-          </div>
-
-          <div class="step-counter">
-            01 / 04
-          </div>
-
-        </header>
-
-
-        <main class="hero-grid">
-
-          <section>
-
-            <div class="eyebrow">
-
-              <span class="eyebrow-dot"></span>
-
-              Для двоих путешественников
-
-            </div>
-
-
-            <h1>
-
-              Найдите место,
-              <br>
-
-              которое
-              <br>
-
-              понравится <em>обоим.</em>
-
-            </h1>
-
-
-            <p class="lead">
-
-              Два человека. Два набора желаний.
-              Один город, который устроит всех.
-              Заполните анкеты, а мы найдём ваш
-              лучший компромисс.
-
-            </p>
-
-
-            <button
-              class="primary-btn"
-              id="create-btn"
-            >
-              Начать планирование&nbsp; →
-            </button>
-
-
-            <div id="create-out"></div>
-
-          </section>
-
-
-          <section class="travel-visual">
-
-            <div class="visual-image"></div>
-
-            <div class="visual-overlay"></div>
-
-            <div class="route-line"></div>
-
-
-            <div class="visual-label">
-
-              <small>
-                ваше следующее путешествие
-              </small>
-
-              <strong>
-                Где-то по пути.
-              </strong>
-
-            </div>
-
-          </section>
-
-        </main>
-
-      </div>
-
-    </div>
-  `;
-
-
-  document.getElementById(
-    'create-btn'
-  ).onclick = async () => {
-
-    const btn =
-      document.getElementById(
-        'create-btn'
-      );
-
-    const out =
-      document.getElementById(
-        'create-out'
-      );
-
-    btn.disabled = true;
-
-    btn.textContent =
-      'Создаём путешествие...';
-
-
-    try {
-
-      const data =
-        await api(
-          '/session/create',
-          {
-            method: 'POST'
-          }
-        );
-
-
-      const link1 =
-        location.origin +
-        location.pathname +
-        '#/join/' +
-        data.session_id +
-        '/1';
-
-
-      const link2 =
-        location.origin +
-        location.pathname +
-        '#/join/' +
-        data.session_id +
-        '/2';
-
-
-      renderInvite(
-        data.session_id,
-        link1,
-        link2
-      );
-
-
-    } catch (e) {
-
-      btn.disabled = false;
-
-      btn.textContent =
-        'Начать планирование →';
-
-
-      out.innerHTML = `
-
-        <div class="error">
-
-          Не удалось создать сессию:
-          ${escapeHtml(e.message)}
-
-        </div>
-
-      `;
-
-    }
-
-  };
-}
-
-
-/* =========================================================
-   INVITE
-========================================================= */
-
-function renderInvite(
-  sessionId,
-  link1,
-  link2
-) {
-
-  app.innerHTML = `
-
-    <div class="center-page">
-
-      <div class="center-card">
-
-
-        <div
-          class="eyebrow"
-          style="justify-content:center"
-        >
-
-          <span class="eyebrow-dot"></span>
-
-          Сессия создана
-
-        </div>
-
-
-        <h2>
-
-          Пригласите
-          <br>
-
-          <em>напарника.</em>
-
-        </h2>
-
-
-        <p>
-
-          Отправьте каждому свою ссылку.
-          Ответы останутся скрыты до момента,
-          когда мы найдём общий вариант.
-
-        </p>
-
-
-        <div class="invites">
-
-
-          <div class="invite">
-
-            <div class="invite-number">
-              Участник 01
-            </div>
-
-
-            <div class="invite-link">
-
-              ${escapeHtml(link1)}
-
-            </div>
-
-
-            <button
-              class="copy-btn"
-              data-link="${escapeAttr(link1)}"
-            >
-
-              Скопировать ссылку
-
-            </button>
-
-          </div>
-
-
-          <div class="invite">
-
-            <div class="invite-number">
-              Участник 02
-            </div>
-
-
-            <div class="invite-link">
-
-              ${escapeHtml(link2)}
-
-            </div>
-
-
-            <button
-              class="copy-btn"
-              data-link="${escapeAttr(link2)}"
-            >
-
-              Скопировать ссылку
-
-            </button>
-
-          </div>
-
-
-        </div>
-
-
-        <p
-          style="
-            margin-top:28px;
-            margin-bottom:0;
-            font-size:11px
-          "
-        >
-
-          Сессия готова · ждём обоих участников
-
-        </p>
-
-      </div>
-
-    </div>
-  `;
-
-
-  document
-    .querySelectorAll('.copy-btn')
-    .forEach(btn => {
-
-      btn.onclick = async () => {
-
-        try {
-
-          await navigator.clipboard.writeText(
-            btn.dataset.link
-          );
-
-          btn.textContent =
-            'Скопировано ✓';
-
-
-          setTimeout(() => {
-
-            btn.textContent =
-              'Скопировать ссылку';
-
-          }, 1800);
-
-
-        } catch (e) {
-
-          alert(btn.dataset.link);
-
+    <input id="api-base" value="http://localhost:8000" />
+
+    <!-- ===== КАСТОМНЫЙ КУРСОР ===== -->
+    <div class="custom-cursor" id="cursor"></div>
+    <div class="custom-cursor-dot" id="cursorDot"></div>
+
+    <div id="app"></div>
+
+    <script>
+        // ============================================================
+        // 0. КАСТОМНЫЙ КУРСОР
+        // ============================================================
+
+        const cursor = document.getElementById('cursor');
+        const cursorDot = document.getElementById('cursorDot');
+        let mouseX = 0,
+            mouseY = 0;
+        let cursorX = 0,
+            cursorY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        function animateCursor() {
+            cursorX += (mouseX - cursorX) * 0.15;
+            cursorY += (mouseY - cursorY) * 0.15;
+            cursor.style.left = cursorX + 'px';
+            cursor.style.top = cursorY + 'px';
+            cursorDot.style.left = mouseX + 'px';
+            cursorDot.style.top = mouseY + 'px';
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        // Эффекты при наведении на интерактивные элементы
+        document.addEventListener('mouseover', (e) => {
+            const target = e.target;
+            if (target.closest('button') || target.closest('a') || target.closest('.js-alt') || target.closest('.tag') ||
+                target.closest('.copy-btn') || target.closest('.secondary-btn')) {
+                cursor.classList.add('hover');
+                cursorDot.classList.add('hover');
+            }
+        });
+
+        document.addEventListener('mouseout', (e) => {
+            const target = e.target;
+            if (target.closest('button') || target.closest('a') || target.closest('.js-alt') || target.closest('.tag') ||
+                target.closest('.copy-btn') || target.closest('.secondary-btn')) {
+                cursor.classList.remove('hover');
+                cursorDot.classList.remove('hover');
+            }
+        });
+
+        // Эффект клика
+        document.addEventListener('mousedown', () => {
+            cursor.classList.add('click');
+        });
+        document.addEventListener('mouseup', () => {
+            cursor.classList.remove('click');
+        });
+
+        // Скрываем курсор на мобильных
+        if ('ontouchstart' in window) {
+            cursor.style.display = 'none';
+            cursorDot.style.display = 'none';
         }
 
-      };
-
-    });
-}
-
-
-/* =========================================================
-   JOIN
-========================================================= */
-
-function renderJoin(
-  sessionId,
-  participantNumber
-) {
-
-  const selectedVibes =
-    new Set();
-
-  const selectedMustHaves =
-    new Set();
-
-
-  app.innerHTML = `
-
-    <div class="form-page">
-
-      <div class="form-shell">
-
-
-        <header class="topbar">
-
-          <div class="logo">
-
-            <div class="logo-mark">
-              ↗
-            </div>
-
-            <span>
-              тревел-компромисс
-            </span>
-
-          </div>
-
-
-          <div class="step-counter">
-            02 / 04
-          </div>
-
-        </header>
-
-
-        <div class="form-header">
-
-
-          <div>
-
-            <div class="eyebrow">
-
-              <span class="eyebrow-dot"></span>
-
-              Участник ${participantNumber}
-
-            </div>
-
-
-            <h2>
-
-              Расскажите,
-              <br>
-
-              чего хотите
-              <br>
-
-              <em>вы.</em>
-
-            </h2>
-
-          </div>
-
-
-          <p>
-
-            Не нужно долго думать.
-            Выберите то, что важно именно вам,
-            а компромисс мы возьмём на себя.
-
-          </p>
-
-        </div>
-
-
-        <div class="form-card">
-
-
-          <div class="field">
-
-
-            <div class="field-label">
-
-              <span>
-                Откуда выезжаем?
-              </span>
-
-              <span class="field-number">
-                01
-              </span>
-
-            </div>
-
-
-            <input
-              id="origin_city"
-              class="text-input"
-              placeholder="Москва"
-              autocomplete="off"
-            >
-
-          </div>
-
-
-          <div class="field">
-
-
-            <div class="field-label">
-
-              <span>
-                Какой бюджет на поездку?
-              </span>
-
-              <span class="field-number">
-                02
-              </span>
-
-            </div>
-
-
-            <div class="budget-wrap">
-
-
-              <div class="budget-value">
-
-                <span id="budget-value">
-                  30 000
-                </span>
-
-                ₽
-
-              </div>
-
-
-              <input
-                id="budget"
-                type="range"
-                min="5000"
-                max="200000"
-                step="5000"
-                value="30000"
-              >
-
-            </div>
-
-          </div>
-
-
-          <div class="field">
-
-
-            <div class="field-label">
-
-              <span>
-                Когда хотите поехать?
-              </span>
-
-              <span class="field-number">
-                03
-              </span>
-
-            </div>
-
-
-            <div class="date-grid">
-
-
-              <div>
-
-                <div
-                  class="muted"
-                  style="
-                    font-size:11px;
-                    margin-bottom:7px
-                  "
-                >
-                  Вылет
-                </div>
-
-
-                <input
-                  id="departure_date"
-                  class="date-input"
-                  type="date"
-                >
-
-              </div>
-
-
-              <div>
-
-                <div
-                  class="muted"
-                  style="
-                    font-size:11px;
-                    margin-bottom:7px
-                  "
-                >
-                  Возвращение
-                </div>
-
-
-                <input
-                  id="return_date"
-                  class="date-input"
-                  type="date"
-                >
-
-              </div>
-
-
-            </div>
-
-          </div>
-
-
-          <div class="field">
-
-
-            <div class="field-label">
-
-              <span>
-                Какой у вас вайб?
-              </span>
-
-              <span class="field-number">
-                04 · МОЖНО НЕСКОЛЬКО
-              </span>
-
-            </div>
-
-
-            <div
-              class="tag-grid"
-              id="vibe-tags"
-            ></div>
-
-          </div>
-
-
-          <div class="field">
-
-
-            <div class="field-label">
-
-              <span>
-                Чем нельзя жертвовать?
-              </span>
-
-              <span class="field-number">
-                05
-              </span>
-
-            </div>
-
-
-            <div
-              class="tag-grid"
-              id="must-tags"
-            ></div>
-
-          </div>
-
-
-          <div class="submit-row">
-
-            <button
-              class="primary-btn"
-              id="submit-btn"
-            >
-
-              Найти наш город&nbsp; →
-
-            </button>
-
-          </div>
-
-
-          <div id="join-out"></div>
-
-
-        </div>
-
-      </div>
-
-    </div>
-  `;
-
-
-  /* VIBES */
-
-  const vibeBox =
-    document.getElementById(
-      'vibe-tags'
-    );
-
-
-  VIBE_TAGS.forEach(tag => {
-
-    const el =
-      document.createElement(
-        'button'
-      );
-
-    el.type = 'button';
-
-    el.className = 'tag';
-
-
-    const info =
-      VIBE_INFO[tag];
-
-
-    el.innerHTML = `
-
-      <span class="tag-icon">
-        ${info[0]}
-      </span>
-
-      ${info[1]}
-
-    `;
-
-
-    el.onclick = () => {
-
-      el.classList.toggle(
-        'active'
-      );
-
-
-      if (
-        selectedVibes.has(tag)
-      ) {
-
-        selectedVibes.delete(
-          tag
-        );
-
-      } else {
-
-        selectedVibes.add(
-          tag
-        );
-
-      }
-
-    };
-
-
-    vibeBox.appendChild(el);
-
-  });
-
-
-  /* MUST HAVES */
-
-  const mustBox =
-    document.getElementById(
-      'must-tags'
-    );
-
-
-  MUST_HAVES.forEach(tag => {
-
-    const el =
-      document.createElement(
-        'button'
-      );
-
-
-    el.type = 'button';
-
-    el.className = 'tag';
-
-
-    const info =
-      MUST_INFO[tag];
-
-
-    el.innerHTML = `
-
-      <span class="tag-icon">
-        ${info[0]}
-      </span>
-
-      ${info[1]}
-
-    `;
-
-
-    el.onclick = () => {
-
-      el.classList.toggle(
-        'active'
-      );
-
-
-      if (
-        selectedMustHaves.has(tag)
-      ) {
-
-        selectedMustHaves.delete(
-          tag
-        );
-
-      } else {
-
-        selectedMustHaves.add(
-          tag
-        );
-
-      }
-
-    };
-
-
-    mustBox.appendChild(el);
-
-  });
-
-
-  /* BUDGET */
-
-  const budgetInput =
-    document.getElementById(
-      'budget'
-    );
-
-  const budgetValue =
-    document.getElementById(
-      'budget-value'
-    );
-
-
-  budgetInput.addEventListener(
-    'input',
-    () => {
-
-      budgetValue.textContent =
-        Number(
-          budgetInput.value
-        ).toLocaleString(
-          'ru-RU'
-        );
-
-    }
-  );
-
-
-  /* SUBMIT */
-
-  document.getElementById(
-    'submit-btn'
-  ).onclick = async () => {
-
-
-    const out =
-      document.getElementById(
-        'join-out'
-      );
-
-
-    const btn =
-      document.getElementById(
-        'submit-btn'
-      );
-
-
-    const body = {
-
-      origin_city:
-        document.getElementById(
-          'origin_city'
-        ).value,
-
-      budget:
-        Number(
-          document.getElementById(
-            'budget'
-          ).value
-        ),
-
-      vibe_tags:
-        [...selectedVibes],
-
-      must_haves:
-        [...selectedMustHaves],
-
-      departure_date:
-        document.getElementById(
-          'departure_date'
-        ).value,
-
-      return_date:
-        document.getElementById(
-          'return_date'
-        ).value
-
-    };
-
-
-    if (!body.origin_city) {
-
-      out.innerHTML = `
-
-        <div class="error">
-
-          Укажите город отправления.
-
-        </div>
-
-      `;
-
-      return;
-
-    }
-
-
-    if (
-      !body.departure_date ||
-      !body.return_date
-    ) {
-
-      out.innerHTML = `
-
-        <div class="error">
-
-          Выберите даты поездки.
-
-        </div>
-
-      `;
-
-      return;
-
-    }
-
-
-    btn.disabled = true;
-
-    btn.textContent =
-      'Сохраняем предпочтения...';
-
-
-    try {
-
-      await api(
-        `/session/${sessionId}/join/${participantNumber}`,
-        {
-          method: 'POST',
-
-          body:
-            JSON.stringify(body)
-
-        }
-      );
-
-
-      location.hash =
-        `#/wait/${sessionId}`;
-
-
-    } catch (e) {
-
-      btn.disabled = false;
-
-      btn.textContent =
-        'Найти наш город →';
-
-
-      out.innerHTML = `
-
-        <div class="error">
-
-          Что-то пошло не так:
-          ${escapeHtml(e.message)}
-
-        </div>
-
-      `;
-
-    }
-
-  };
-
-}
-
-
-/* =========================================================
-   WAIT
-========================================================= */
-
-let pollTimer = null;
-
-
-function renderWait(
-  sessionId
-) {
-
-  app.innerHTML = `
-
-    <div class="waiting">
-
-
-      <div class="wait-card">
-
-
-        <div class="wait-orbit"></div>
-
-
-        <div
-          class="eyebrow"
-          style="
-            justify-content:center
-          "
-        >
-
-          <span class="eyebrow-dot"></span>
-
-          Сравниваем предпочтения
-
-        </div>
-
-
-        <h2>
-
-          Ищем ваш
-          <br>
-
-          <em>общий знаменатель.</em>
-
-        </h2>
-
-
-        <p>
-
-          Ждём, пока оба путешественника
-          закончат свои анкеты.
-
-        </p>
-
-
-        <div
-          id="wait-status"
-          class="status-list"
-        >
-
-          <div class="loading">
-
-            <span class="loading-dot"></span>
-
-            Проверяем сессию...
-
-          </div>
-
-        </div>
-
-
-      </div>
-
-    </div>
-  `;
-
-
-  const statusEl =
-    document.getElementById(
-      'wait-status'
-    );
-
-
-  clearInterval(
-    pollTimer
-  );
-
-
-  const check =
-    async () => {
-
-      try {
-
-        const data =
-          await api(
-            `/session/${sessionId}/status`
-          );
-
-
-        const p1 =
-          data.participant_1_submitted;
-
-        const p2 =
-          data.participant_2_submitted;
-
-
-        statusEl.innerHTML = `
-
-          <div
-            class="status-pill
-            ${p1 ? 'done' : ''}"
-          >
-
-            ${p1 ? '✓' : '○'}
-
-            Участник 01
-
-          </div>
-
-
-          <div
-            class="status-pill
-            ${p2 ? 'done' : ''}"
-          >
-
-            ${p2 ? '✓' : '○'}
-
-            Участник 02
-
-          </div>
-
-        `;
-
-
-        if (p1 && p2) {
-
-          clearInterval(
-            pollTimer
-          );
-
-
-          setTimeout(() => {
-
-            location.hash =
-              `#/result/${sessionId}`;
-
-          }, 500);
-
+        // ============================================================
+        // 1. API / ОБЩИЕ ДАННЫЕ
+        // ============================================================
+
+        const app = document.getElementById('app');
+        const apiBaseInput = document.getElementById('api-base');
+
+        function apiBase() {
+            return apiBaseInput.value.replace(/\/$/, '');
         }
 
-
-      } catch (e) {
-
-        statusEl.innerHTML = `
-
-          <div class="error">
-
-            ${escapeHtml(
-              e.message
-            )}
-
-          </div>
-
-        `;
-
-      }
-
-    };
-
-
-  check();
-
-  pollTimer =
-    setInterval(
-      check,
-      2000
-    );
-
-}
-
-
-/* =========================================================
-   RESULT
-========================================================= */
-
-async function renderResult(sessionId) {
-
-  clearInterval(pollTimer);
-
-  app.innerHTML = `
-
-    <div class="result-page">
-
-      <div class="result-shell">
-
-        <header class="topbar">
-
-          <div class="logo">
-
-            <div class="logo-mark">
-              ↗
-            </div>
-
-            <span>
-              тревел-компромисс
-            </span>
-
-          </div>
-
-          <div class="step-counter">
-            04 / 04
-          </div>
-
-        </header>
-
-        <div class="result-heading">
-
-          <div class="eyebrow">
-
-            <span class="eyebrow-dot"></span>
-
-            Компромисс найден
-
-          </div>
-
-          <h2>
-
-            У вас есть
-            <br>
-
-            <em>город.</em>
-
-          </h2>
-
-          <p>
-
-            Мы сравнили бюджет, транспорт,
-            вайб и обязательные условия обоих
-            путешественников.
-
-          </p>
-
-        </div>
-
-        <div id="result-out">
-
-          <div class="loading">
-
-            <span class="loading-dot"></span>
-
-            Ищем лучший вариант...
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-  `;
-
-  const out = document.getElementById('result-out');
-
-  try {
-
-    const data = await api(`/session/${sessionId}/result`);
-
-    if (!data.matches || !data.matches.length) {
-
-      out.innerHTML = `
-
-        <div class="form-card">
-
-          <h3
-            style="
-              font-family:'Playfair Display',serif;
-              font-size:32px;
-              font-weight:500
-            "
-          >
-
-            Идеального совпадения
-            не нашли.
-
-          </h3>
-
-          <p class="muted">
-
-            Попробуйте изменить бюджет
-            или предпочтения.
-
-          </p>
-
-        </div>
-
-      `;
-
-      return;
-
-    }
-
-    renderMatchDetail(data.matches, 0);
-
-  } catch (e) {
-
-    out.innerHTML = `
-
-      <div class="form-card">
-
-        <div class="error">
-
-          Не удалось загрузить результат:
-          ${escapeHtml(e.message)}
-
-        </div>
-
-      </div>
-
-    `;
-
-  }
-
-}
-
-
-/* =========================================================
-   RESULT · MATCH DETAIL (переиспользуется для лучшего
-   города и для любой альтернативы, на которую кликнули)
-========================================================= */
-
-function renderMatchDetail(matches, activeIndex) {
-
-  const out = document.getElementById('result-out');
-
-  const match = matches[activeIndex];
-
-  if (!match || !out) {
-    return;
-  }
-
-  const score = normalizeScore(match.total_score);
-
-  const city = match.city || 'Ваш город';
-
-  const image = cityImage(city);
-
-  const p1 = match.participant_1 || {};
-  const p2 = match.participant_2 || {};
-
-  const transport1 = Number(p1.transport_price || 0);
-  const transport2 = Number(p2.transport_price || 0);
-
-  const avgTransport = Math.round(
-    (transport1 + transport2) / 2
-  );
-
-  const vibe1 = Math.round(Number(p1.vibe_match || 0) * 100);
-  const vibe2 = Math.round(Number(p2.vibe_match || 0) * 100);
-
-  const vibeAvg = Math.round((vibe1 + vibe2) / 2);
-
-  const isTop = activeIndex === 0;
-
-  const otherMatches = matches
-    .map((m, i) => ({ m, i }))
-    .filter(({ i }) => i !== activeIndex);
-
-  out.innerHTML = `
-
-    <section class="result-hero">
-
-      <div
-        class="result-bg"
-        style="background-image:url('${image}')"
-      ></div>
-
-      <div class="result-content">
-
-        <div class="match-badge">
-
-          ${score}% совпадение${isTop ? '' : ' · альтернатива'}
-
-        </div>
-
-        <h1 class="result-city">
-
-          ${escapeHtml(city)}
-
-        </h1>
-
-        <div class="result-sub">
-
-          <div class="result-chip">
-            ✈ ~${formatMoney(avgTransport)} ₽ транспорт
-          </div>
-
-          <div class="result-chip">
-            ✦ ${vibeAvg}% совпадение по вайбу
-          </div>
-
-          <div class="result-chip">
-            ♡ подходит вам обоим
-          </div>
-
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <section class="metrics">
-
-      <div class="metric">
-        <div class="metric-label">Совпадение</div>
-        <div class="metric-value">${score}%</div>
-      </div>
-
-      <div class="metric">
-        <div class="metric-label">Транспорт</div>
-        <div class="metric-value">~${formatMoney(avgTransport)} ₽</div>
-      </div>
-
-      <div class="metric">
-        <div class="metric-label">Участник 01</div>
-        <div class="metric-value">${vibe1}% вайб</div>
-      </div>
-
-      <div class="metric">
-        <div class="metric-label">Участник 02</div>
-        <div class="metric-value">${vibe2}% вайб</div>
-      </div>
-
-    </section>
-
-
-    <section style="margin-bottom:38px">
-
-      <div class="section-title">
-        <h3>Как добраться?</h3>
-        <span>билеты на Tutu</span>
-      </div>
-
-      <div class="runners">
-        ${transportCardHtml('Участник 01', p1)}
-        ${transportCardHtml('Участник 02', p2)}
-      </div>
-
-    </section>
-
-
-    ${match.hotel ? hotelSectionHtml(match.hotel) : ''}
-
-    ${match.why && match.why.length ? whySectionHtml(match.why) : ''}
-
-    ${otherMatches.length ? alternativesSectionHtml(otherMatches) : ''}
-
-
-    <div class="bottom-note">
-
-      <h3>
-        ${isTop ? 'Ваш компромисс найден.' : 'Хороший запасной вариант.'}
-      </h3>
-
-      <p>
-        Два набора желаний. Один город.
-        Осталось только купить билеты.
-      </p>
-
-    </div>
-
-  `;
-
-  document.querySelectorAll('.js-alt').forEach(el => {
-
-    el.onclick = () => {
-
-      const idx = Number(el.dataset.index);
-
-      renderMatchDetail(matches, idx);
-
-      out.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });
-
-    };
-
-  });
-
-}
-
-
-function transportCardHtml(label, p) {
-
-  const price = Number(p.transport_price || 0);
-  const type = transportTypeLabel(p.transport_type);
-  const url = p.transport_checkout_url;
-
-  return `
-
-    <div class="runner" style="cursor:default">
-
-      <div>
-
-        <div class="runner-rank">
-          ${escapeHtml(label)} · ${escapeHtml(type)}
-        </div>
-
-        <div class="runner-city" style="font-size:24px">
-          ${formatMoney(price)} ₽
-        </div>
-
-        ${
-          p.within_budget === false
-            ? '<div class="hotel-meta" style="color:#c83c22;margin-top:6px">вне бюджета</div>'
-            : ''
+        const VIBE_TAGS = ['расслабон', 'движ', 'культура', 'еда', 'природа', 'бюджет'];
+        const MUST_HAVES = ['no_transfers', 'budget_stay', 'food_nearby'];
+
+        const VIBE_INFO = {
+            'расслабон': ['☁', 'Спокойствие'],
+            'движ': ['↗', 'Приключения'],
+            'культура': ['◈', 'Культура'],
+            'еда': ['✦', 'Еда'],
+            'природа': ['⌁', 'Природа'],
+            'бюджет': ['₽', 'Бюджет']
+        };
+        const MUST_INFO = {
+            no_transfers: ['→', 'Без пересадок'],
+            budget_stay: ['⌂', 'Недорогое жильё'],
+            food_nearby: ['✦', 'Еда рядом']
+        };
+
+        const SUPPORTED_CITIES = [
+            "Санкт-Петербург", "Казань", "Сочи", "Калининград",
+            "Нижний Новгород", "Екатеринбург", "Красная Поляна",
+            "Суздаль", "Владимир", "Ярославль", "Великий Новгород",
+            "Псков", "Тверь", "Выборг", "Углич", "Москва"
+        ];
+        const CITY_ALIASES = {
+            'спб': 'Санкт-Петербург',
+            'питер': 'Санкт-Петербург',
+            'санкт петербург': 'Санкт-Петербург',
+            'казань': 'Казань',
+            'сочи': 'Сочи',
+            'калининград': 'Калининград',
+            'нижний': 'Нижний Новгород',
+            'н новгород': 'Нижний Новгород',
+            'екатеринбург': 'Екатеринбург',
+            'екб': 'Екатеринбург',
+            'красная поляна': 'Красная Поляна',
+            'суздаль': 'Суздаль',
+            'владимир': 'Владимир',
+            'ярославль': 'Ярославль',
+            'великий новгород': 'Великий Новгород',
+            'псков': 'Псков',
+            'тверь': 'Тверь',
+            'выборг': 'Выборг',
+            'углич': 'Углич',
+            'мск': 'Москва'
+        };
+        const KIND_LABELS = {
+            'architecture': 'Архитектура',
+            'religion': 'Религия',
+            'accommodations': 'Проживание',
+            'museums': 'Музеи',
+            'cultural': 'Культура',
+            'historic': 'Историческое место',
+            'nature': 'Природа',
+            'park': 'Парк',
+            'monument': 'Памятник',
+            'attraction': 'Достопримечательность',
+            'amusements': 'Развлечения',
+            'foods': 'Еда',
+            'restaurants': 'Рестораны',
+            'cafe': 'Кафе',
+            'bar': 'Бар',
+            'fast_food': 'Фастфуд',
+            'cuisine': 'Кухня',
+            'theatre': 'Театр',
+            'opera': 'Опера',
+            'gallery': 'Галерея',
+            'exhibition': 'Выставка',
+            'church': 'Церковь',
+            'cathedral': 'Собор',
+            'square': 'Площадь',
+            'garden': 'Сад',
+            'landmark': 'Достопримечательность',
+            'panorama': 'Панорама',
+            'castle': 'Замок',
+            'fortress': 'Крепость',
+            'memorial': 'Мемориал',
+            'beaches': 'Пляжи',
+            'natural': 'Природа',
+            'spas': 'Спа',
+            'nightclubs': 'Ночные клубы',
+            'adult': 'Взрослые развлечения'
+        };
+
+        // ============================================================
+        // 2. ВАЛИДАЦИЯ
+        // ============================================================
+
+        function normalizeCity(input) {
+            return String(input || '').trim().toLowerCase().replace(/\s+/g, ' ');
         }
 
-      </div>
+        function validateCity(input) {
+            const normalized = normalizeCity(input);
+            if (!normalized || normalized.length < 2) {
+                return { valid: false, message: '❌ Введите город отправления (минимум 2 символа)' };
+            }
+            const exactMatch = SUPPORTED_CITIES.find(c => c.toLowerCase() === normalized);
+            if (exactMatch) return { valid: true, city: exactMatch };
+            const aliasMatch = CITY_ALIASES[normalized];
+            if (aliasMatch) return { valid: true, city: aliasMatch };
+            if (normalized.length > 2) {
+                const partialMatch = SUPPORTED_CITIES.find(c =>
+                    c.toLowerCase().includes(normalized) || normalized.includes(c.toLowerCase())
+                );
+                if (partialMatch) {
+                    return { valid: true, city: partialMatch, suggestion: `💡 Вы имели в виду "${partialMatch}"?` };
+                }
+            }
+            return { valid: false, message: `❌ Город "${input}" не поддерживается. Доступные направления: ${SUPPORTED_CITIES.join(', ')}` };
+        }
 
-      ${
-        url
-          ? `<a
-              href="${escapeAttr(url)}"
-              target="_blank"
-              rel="noopener"
-              class="secondary-btn"
-              style="text-decoration:none;align-self:center;white-space:nowrap"
-            >Купить на Tutu →</a>`
-          : ''
-      }
+        function validateDates(departure, returnDate) {
+            if (!departure || !returnDate) return { valid: false, message: '❌ Выберите обе даты поездки' };
+            const dep = new Date(departure);
+            const ret = new Date(returnDate);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            if (isNaN(dep.getTime()) || isNaN(ret.getTime())) return { valid: false, message: '❌ Некорректный формат даты' };
+            if (dep < today) return { valid: false, message: '❌ Дата вылета не может быть в прошлом' };
+            if (ret <= dep) return { valid: false, message: '❌ Дата возвращения должна быть позже даты вылета' };
+            const diffDays = Math.ceil(Math.abs(ret - dep) / (1000 * 60 * 60 * 24));
+            if (diffDays > 30) return { valid: false, message: '❌ Максимальная длительность поездки — 30 дней' };
+            return { valid: true };
+        }
 
-    </div>
+        function getKindLabel(kinds) {
+            if (!kinds) return 'Место';
+            const firstKind = kinds.split(',')[0].trim().toLowerCase();
+            return KIND_LABELS[firstKind] || firstKind.replace(/_/g, ' ');
+        }
 
-  `;
+        // ============================================================
+        // 3. РОУТЕР
+        // ============================================================
 
-}
+        function route() {
+            const hash = location.hash.slice(2);
+            const parts = hash.split('/').filter(Boolean);
+            if (parts[0] === 'join' && parts[1] && parts[2]) return renderJoin(parts[1], parts[2]);
+            if (parts[0] === 'wait' && parts[1]) return renderWait(parts[1]);
+            if (parts[0] === 'result' && parts[1]) return renderResult(parts[1]);
+            return renderCreate();
+        }
+        window.addEventListener('hashchange', route);
 
+        // ============================================================
+        // 4. API
+        // ============================================================
 
-function hotelSectionHtml(hotel) {
+        async function api(path, opts) {
+            const res = await fetch(apiBase() + path, {
+                headers: { 'Content-Type': 'application/json' },
+                ...opts
+            });
+            if (!res.ok) {
+                let msg = res.status;
+                try { msg = (await res.json()).message || msg; } catch (_) {}
+                throw new Error(msg);
+            }
+            return res.json();
+        }
 
-  return `
+        // ============================================================
+        // 5. АНИМАЦИИ (только счётчик на странице результатов)
+        // ============================================================
 
-    <section style="margin-bottom:38px">
+        function animateCounter(element, target, duration = 1500) {
+            if (!element) return;
+            const start = 0;
+            const startTime = performance.now();
 
-      <div class="section-title">
-        <h3>Где остановиться?</h3>
-        <span>рекомендованный отель</span>
-      </div>
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                const current = Math.round(start + (target - start) * eased);
+                element.textContent = current + '%';
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                } else {
+                    element.textContent = target + '%';
+                }
+            }
+            requestAnimationFrame(update);
+        }
 
-      <div class="hotel-box">
+        // ============================================================
+        // 6. КАРТИНКИ ДЛЯ ГОРОДОВ
+        // ============================================================
 
-        <div
-          style="
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            gap:15px;
-            flex-wrap:wrap
-          "
-        >
+        function cityImage(city) {
+            return 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=85';
+        }
 
-          <div>
+        // ============================================================
+        // 7. РЕНДЕР СТРАНИЦ
+        // ============================================================
 
-            <div class="hotel-title">
-
-              ${escapeHtml(hotel.name || 'Рекомендованный отель')}
-
-              ${
-                hotel.stars
-                  ? ' ' + '★'.repeat(Number(hotel.stars))
-                  : ''
-              }
-
-            </div>
-
-            <div class="hotel-meta">
-
-              ${
-                hotel.price
-                  ? formatMoney(Math.round(Number(hotel.price))) + ' ₽'
-                  : 'Цена не указана'
-              }
-
-              ${
-                hotel.breakfast_included
-                  ? ' · завтрак включён'
-                  : ''
-              }
-
-            </div>
-
-          </div>
-
-          ${
-            hotel.checkout_url
-              ? `<a
-                  href="${escapeAttr(hotel.checkout_url)}"
-                  target="_blank"
-                  rel="noopener"
-                  class="copy-btn"
-                  style="text-decoration:none;white-space:nowrap"
-                >Забронировать на Tutu →</a>`
-              : ''
-          }
-
-        </div>
-
-      </div>
-
-    </section>
-
-  `;
-
-}
-
-
-function whySectionHtml(places) {
-
-  return `
-
-    <section style="margin-bottom:38px">
-
-      <div class="section-title">
-        <h3>Почему сюда?</h3>
-        <span>под ваш общий вайб</span>
-      </div>
-
-      <div class="hotel-box">
-
-        ${places
-          .map(place => `
-
-            <div
-              style="
-                padding:8px 0;
-                border-bottom:1px solid var(--line)
-              "
-            >
-
-              <div class="hotel-title">
-                ${escapeHtml(place.name || 'Место')}
+        function renderCreate() {
+            app.innerHTML = `
+            <div class="page">
+              <div class="floating-dots">
+                ${Array.from({length: 20}, () => '<div class="floating-dot"></div>').join('')}
               </div>
-
-              <div class="hotel-meta">
-                ${escapeHtml(
-                  (place.kinds || '')
-                    .split(',')[0]
-                    .replace(/_/g, ' ')
-                )}
+              <div class="shell">
+                <header class="topbar">
+                  <div class="logo"><div class="logo-mark spin-slow">↗</div><span>тревел-компромисс</span></div>
+                  <div class="step-counter">01 / 04</div>
+                </header>
+                <main class="hero-grid">
+                  <section>
+                    <div class="eyebrow"><span class="eyebrow-dot"></span>Для двоих путешественников</div>
+                    <h1>Найдите место,<br>которое<br>понравится <em>обоим.</em></h1>
+                    <div class="deco-line"></div>
+                    <p class="lead">Два человека. Два набора желаний. Один город, который устроит всех. Заполните анкеты, а мы найдём ваш лучший компромисс.</p>
+                    <button class="primary-btn shimmer-btn" id="create-btn">Начать планирование&nbsp; →</button>
+                    <div id="create-out"></div>
+                  </section>
+                  <section class="travel-visual pulse-ring">
+                    <div class="visual-image"></div>
+                    <div class="visual-overlay"></div>
+                    <div class="route-line"></div>
+                    <div class="visual-label"><small>ваше следующее путешествие</small><strong>Где-то по пути.</strong></div>
+                  </section>
+                </main>
               </div>
-
             </div>
+          `;
+            document.getElementById('create-btn').onclick = async () => {
+                const btn = document.getElementById('create-btn');
+                const out = document.getElementById('create-out');
+                btn.disabled = true;
+                btn.textContent = 'Создаём путешествие...';
+                try {
+                    const data = await api('/session/create', { method: 'POST' });
+                    const link1 = location.origin + location.pathname + '#/join/' + data.session_id + '/1';
+                    const link2 = location.origin + location.pathname + '#/join/' + data.session_id + '/2';
+                    renderInvite(data.session_id, link1, link2);
+                } catch (e) {
+                    btn.disabled = false;
+                    btn.textContent = 'Начать планирование →';
+                    out.innerHTML = `<div class="error">Не удалось создать сессию: ${escapeHtml(e.message)}</div>`;
+                }
+            };
+        }
 
-          `)
-          .join('')}
-
-      </div>
-
-    </section>
-
-  `;
-
-}
-
-
-function alternativesSectionHtml(others) {
-
-  return `
-
-    <section>
-
-      <div class="section-title">
-        <h3>Ещё варианты</h3>
-        <span>нажмите, чтобы посмотреть подробнее</span>
-      </div>
-
-      <div class="runners">
-
-        ${others
-          .map(({ m, i }) => `
-
-            <div
-              class="runner js-alt"
-              data-index="${i}"
-              style="cursor:pointer"
-            >
-
-              <div>
-
-                <div class="runner-rank">
-                  ${
-                    i === 0
-                      ? '01 · ЛУЧШИЙ ВАРИАНТ'
-                      : '0' + (i + 1) + ' · АЛЬТЕРНАТИВА'
-                  }
+        function renderInvite(sessionId, link1, link2) {
+            app.innerHTML = `
+            <div class="page">
+              <div class="floating-dots">
+                ${Array.from({length: 20}, () => '<div class="floating-dot"></div>').join('')}
+              </div>
+              <div class="side-element side-element-1">✈</div>
+              <div class="side-element side-element-2">🚆</div>
+              <div class="side-element side-element-3">🚢</div>
+              <div class="side-element side-element-4">🚌</div>
+              <div class="center-page">
+                <div class="center-card float-card">
+                  <div class="eyebrow" style="justify-content:center"><span class="eyebrow-dot"></span>Сессия создана</div>
+                  <h2>Пригласите<br><em>напарника.</em></h2>
+                  <p>Отправьте каждому свою ссылку. Ответы останутся скрыты до момента, когда мы найдём общий вариант.</p>
+                  <div class="invites">
+                    <div class="invite float-card-2">
+                      <div class="invite-number">Участник 01</div>
+                      <div class="invite-link">${escapeHtml(link1)}</div>
+                      <button class="copy-btn" data-link="${escapeAttr(link1)}">Скопировать ссылку</button>
+                    </div>
+                    <div class="invite float-card-3">
+                      <div class="invite-number">Участник 02</div>
+                      <div class="invite-link">${escapeHtml(link2)}</div>
+                      <button class="copy-btn" data-link="${escapeAttr(link2)}">Скопировать ссылку</button>
+                    </div>
+                  </div>
+                  <p style="margin-top:28px;margin-bottom:0;font-size:11px">Сессия готова · ждём обоих участников</p>
                 </div>
-
-                <div class="runner-city">
-                  ${escapeHtml(m.city || 'Неизвестно')}
-                </div>
-
               </div>
-
-              <div class="runner-score">
-                ${normalizeScore(m.total_score)}%
-              </div>
-
             </div>
+          `;
+            document.querySelectorAll('.copy-btn').forEach(btn => {
+                btn.onclick = async () => {
+                    try {
+                        await navigator.clipboard.writeText(btn.dataset.link);
+                        btn.textContent = 'Скопировано ✓';
+                        setTimeout(() => { btn.textContent = 'Скопировать ссылку'; }, 1800);
+                    } catch (_) { alert(btn.dataset.link); }
+                };
+            });
+        }
 
-          `)
-          .join('')}
+        function renderJoin(sessionId, participantNumber) {
+            const selectedVibes = new Set();
+            const selectedMustHaves = new Set();
 
-      </div>
+            app.innerHTML = `
+            <div class="page">
+              <div class="floating-dots">
+                ${Array.from({length: 20}, () => '<div class="floating-dot"></div>').join('')}
+              </div>
+              <div class="form-shell">
+                <header class="topbar">
+                  <div class="logo"><div class="logo-mark spin-slow">↗</div><span>тревел-компромисс</span></div>
+                  <div class="step-counter">02 / 04</div>
+                </header>
+                <div class="form-header">
+                  <div>
+                    <div class="eyebrow"><span class="eyebrow-dot"></span>Участник ${participantNumber}</div>
+                    <h2>Расскажите,<br>чего хотите<br><em>вы.</em></h2>
+                    <div class="deco-line"></div>
+                  </div>
+                </div>
+                <div class="form-card">
+                  <div class="field">
+                    <div class="field-label"><span>Откуда выезжаем?</span><span class="field-number">01</span></div>
+                    <input id="origin_city" class="text-input" placeholder="Например, Москва" autocomplete="off" list="city-suggestions">
+                    <datalist id="city-suggestions">${SUPPORTED_CITIES.map(c => `<option value="${escapeAttr(c)}">`).join('')}</datalist>
+                  </div>
+                  <div class="field">
+                    <div class="field-label"><span>Какой бюджет на поездку?</span><span class="field-number">02</span></div>
+                    <div class="budget-wrap">
+                      <div class="budget-value"><span id="budget-value">30 000</span> ₽</div>
+                      <input id="budget" type="range" min="5000" max="200000" step="5000" value="30000">
+                    </div>
+                  </div>
+                  <div class="field">
+                    <div class="field-label"><span>Когда хотите поехать?</span><span class="field-number">03</span></div>
+                    <div class="date-grid">
+                      <div><div class="muted" style="font-size:11px;margin-bottom:7px">Вылет</div><input id="departure_date" class="date-input" type="date"></div>
+                      <div><div class="muted" style="font-size:11px;margin-bottom:7px">Возвращение</div><input id="return_date" class="date-input" type="date"></div>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <div class="field-label"><span>Какой у вас вайб?</span><span class="field-number">04 · МОЖНО НЕСКОЛЬКО</span></div>
+                    <div class="tag-grid" id="vibe-tags"></div>
+                  </div>
+                  <div class="field">
+                    <div class="field-label"><span>Чем нельзя жертвовать?</span><span class="field-number">05</span></div>
+                    <div class="tag-grid" id="must-tags"></div>
+                  </div>
+                  <div class="submit-row">
+                    <button class="primary-btn shimmer-btn" id="submit-btn">Найти наш город&nbsp; →</button>
+                  </div>
+                  <div id="join-out"></div>
+                </div>
+              </div>
+            </div>
+          `;
 
-    </section>
+            const vibeBox = document.getElementById('vibe-tags');
+            VIBE_TAGS.forEach(tag => {
+                const el = document.createElement('button');
+                el.type = 'button';
+                el.className = 'tag';
+                const info = VIBE_INFO[tag];
+                el.innerHTML = `<span class="tag-icon">${info[0]}</span>${info[1]}`;
+                el.onclick = () => {
+                    el.classList.toggle('active');
+                    selectedVibes.has(tag) ? selectedVibes.delete(tag) : selectedVibes.add(tag);
+                };
+                vibeBox.appendChild(el);
+            });
 
-  `;
+            const mustBox = document.getElementById('must-tags');
+            MUST_HAVES.forEach(tag => {
+                const el = document.createElement('button');
+                el.type = 'button';
+                el.className = 'tag';
+                const info = MUST_INFO[tag];
+                el.innerHTML = `<span class="tag-icon">${info[0]}</span>${info[1]}`;
+                el.onclick = () => {
+                    el.classList.toggle('active');
+                    selectedMustHaves.has(tag) ? selectedMustHaves.delete(tag) : selectedMustHaves.add(tag);
+                };
+                mustBox.appendChild(el);
+            });
 
-}
+            const budgetInput = document.getElementById('budget');
+            const budgetValue = document.getElementById('budget-value');
+            budgetInput.addEventListener('input', () => {
+                budgetValue.textContent = Number(budgetInput.value).toLocaleString('ru-RU');
+            });
 
+            const today = new Date().toISOString().split('T')[0];
+            const maxDate = new Date();
+            maxDate.setDate(maxDate.getDate() + 365);
+            const maxDateStr = maxDate.toISOString().split('T')[0];
+            const depInput = document.getElementById('departure_date');
+            const retInput = document.getElementById('return_date');
+            depInput.setAttribute('min', today);
+            depInput.setAttribute('max', maxDateStr);
+            retInput.setAttribute('min', today);
+            retInput.setAttribute('max', maxDateStr);
+            depInput.addEventListener('change', function() {
+                if (retInput.value && retInput.value < this.value) retInput.value = this.value;
+                retInput.setAttribute('min', this.value || today);
+            });
 
-/* =========================================================
-   HELPERS
-========================================================= */
+            const originInput = document.getElementById('origin_city');
+            originInput.addEventListener('blur', function() {
+                const val = this.value;
+                if (!val) { this.classList.remove('valid', 'error'); return; }
+                const validation = validateCity(val);
+                if (!validation.valid) { this.classList.add('error');
+                    this.classList.remove('valid'); } else { this.classList.add('valid');
+                    this.classList.remove('error'); }
+            });
+            originInput.addEventListener('focus', function() { this.classList.remove('error', 'valid'); });
 
-function normalizeScore(score) {
+            document.getElementById('submit-btn').onclick = async () => {
+                const out = document.getElementById('join-out');
+                const btn = document.getElementById('submit-btn');
+                out.innerHTML = '';
+                const originInput = document.getElementById('origin_city');
+                const departureInput = document.getElementById('departure_date');
+                const returnInput = document.getElementById('return_date');
+                [originInput, departureInput, returnInput].forEach(el => el.classList.remove('error', 'valid'));
+                const originVal = originInput.value;
+                const departureVal = departureInput.value;
+                const returnVal = returnInput.value;
+                const budgetVal = Number(document.getElementById('budget').value);
+                let hasError = false;
 
-  let n =
-    Number(score || 0);
+                const cityValidation = validateCity(originVal);
+                if (!cityValidation.valid) {
+                    originInput.classList.add('error');
+                    out.innerHTML += `<div class="error-message">${escapeHtml(cityValidation.message)}</div>`;
+                    hasError = true;
+                } else {
+                    originInput.classList.add('valid');
+                    if (cityValidation.suggestion) out.innerHTML += `<div class="hint-message">${escapeHtml(cityValidation.suggestion)}</div>`;
+                }
 
+                const datesValidation = validateDates(departureVal, returnVal);
+                if (!datesValidation.valid) {
+                    if (!departureVal || departureVal < new Date().toISOString().split('T')[0]) departureInput.classList.add(
+                    'error');
+                    if (!returnVal || returnVal < departureVal) returnInput.classList.add('error');
+                    out.innerHTML += `<div class="error-message">${escapeHtml(datesValidation.message)}</div>`;
+                    hasError = true;
+                } else {
+                    departureInput.classList.add('valid');
+                    returnInput.classList.add('valid');
+                }
 
-  if (n <= 1) {
-    n *= 100;
-  }
+                if (budgetVal < 5000) {
+                    out.innerHTML += `<div class="error-message">Минимальный бюджет — 5 000 ₽</div>`;
+                    hasError = true;
+                }
+                if (selectedVibes.size === 0) {
+                    out.innerHTML += `<div class="error-message">Выберите хотя бы один вайб</div>`;
+                    hasError = true;
+                }
+                if (hasError) {
+                    const firstError = document.querySelector('.error-message');
+                    if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    return;
+                }
 
+                const body = {
+                    origin_city: cityValidation.city || originVal,
+                    budget: budgetVal,
+                    vibe_tags: [...selectedVibes],
+                    must_haves: [...selectedMustHaves],
+                    departure_date: departureVal,
+                    return_date: returnVal
+                };
+                btn.disabled = true;
+                btn.textContent = 'Сохраняем предпочтения...';
+                try {
+                    await api(`/session/${sessionId}/join/${participantNumber}`, { method: 'POST', body: JSON.stringify(body) });
+                    location.hash = `#/wait/${sessionId}`;
+                } catch (e) {
+                    btn.disabled = false;
+                    btn.textContent = 'Найти наш город →';
+                    out.innerHTML = `<div class="error-message">❌ ${escapeHtml(e.message)}</div>`;
+                }
+            };
+        }
 
-  return Math.round(
-    Math.max(
-      0,
-      Math.min(
-        100,
-        n
-      )
-    )
-  );
+        let pollTimer = null;
 
-}
+        function renderWait(sessionId) {
+            app.innerHTML = `
+            <div class="page">
+              <div class="floating-dots">
+                ${Array.from({length: 20}, () => '<div class="floating-dot"></div>').join('')}
+              </div>
 
+              <div class="waiting">
+                <div class="wait-card float-card">
+                  <div class="wait-orbit"></div>
+                  <div class="eyebrow" style="justify-content:center"><span class="eyebrow-dot"></span>Сравниваем предпочтения</div>
+                  <h2>Ищем ваш<br><em>общий знаменатель.</em></h2>
+                  <p>Ждём, пока оба путешественника закончат свои анкеты.</p>
+                  <div id="wait-status" class="status-list">
+                    <div class="loading"><span class="loading-dot"></span> Проверяем сессию...</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+            const statusEl = document.getElementById('wait-status');
+            clearInterval(pollTimer);
+            const check = async () => {
+                try {
+                    const data = await api(`/session/${sessionId}/status`);
+                    const p1 = data.participant_1_submitted;
+                    const p2 = data.participant_2_submitted;
+                    statusEl.innerHTML =
+                        `<div class="status-pill ${p1?'done':''}">${p1?'✓':'○'} Участник 01</div><div class="status-pill ${p2?'done':''}">${p2?'✓':'○'} Участник 02</div>`;
+                    if (p1 && p2) {
+                        clearInterval(pollTimer);
+                        setTimeout(() => { location.hash = `#/result/${sessionId}`; }, 500);
+                    }
+                } catch (e) {
+                    statusEl.innerHTML = `<div class="error">${escapeHtml(e.message)}</div>`;
+                }
+            };
+            check();
+            pollTimer = setInterval(check, 2000);
+        }
 
-const TRANSPORT_LABELS = {
-  train: 'Поезд',
-  suburban: 'Электричка',
-  plane: 'Самолёт',
-  avia: 'Самолёт',
-  bus: 'Автобус',
-  water: 'Водный транспорт'
-};
+        async function renderResult(sessionId) {
+            clearInterval(pollTimer);
+            app.innerHTML = `
+            <div class="page">
+              <div class="floating-dots">
+                ${Array.from({length: 20}, () => '<div class="floating-dot"></div>').join('')}
+              </div>
+              <div class="result-shell">
+                <header class="topbar">
+                  <div class="logo"><div class="logo-mark spin-slow">↗</div><span>тревел-компромисс</span></div>
+                  <div class="step-counter">04 / 04</div>
+                </header>
+                <div class="result-heading">
+                  <div class="eyebrow"><span class="eyebrow-dot"></span>Компромисс найден</div>
+                  <h2>У вас есть<br><em>город.</em></h2>
+                  <div class="deco-line"></div>
+                  <p>Мы сравнили бюджет, транспорт, вайб и обязательные условия обоих путешественников.</p>
+                </div>
+                <div id="result-out">
+                  <div class="loading"><span class="loading-dot"></span> Ищем лучший вариант...</div>
+                </div>
+              </div>
+            </div>
+          `;
+            const out = document.getElementById('result-out');
+            try {
+                const data = await api(`/session/${sessionId}/result`);
+                if (!data.matches || !data.matches.length) {
+                    out.innerHTML = `
+                <div style="text-align:center;padding:60px 30px;background:rgba(255,255,255,0.85);backdrop-filter:blur(10px);border:2px solid var(--purple);border-radius:35px;box-shadow:var(--shadow);">
+                  <div style="font-size:72px;margin-bottom:20px;">🔍</div>
+                  <h3 style="font-family:'Playfair Display',serif;font-size:42px;font-weight:500;margin:0 0 12px;line-height:1.1;">Совпадений <em style="color:var(--orange);font-style:italic;">не найдено</em></h3>
+                  <p style="color:var(--muted);font-size:16px;max-width:480px;margin:0 auto 30px;line-height:1.6;">Мы не смогли найти город, который подошёл бы обоим путешественникам. Попробуйте изменить бюджет, даты или выбрать более широкий набор вайбов.</p>
+                  <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;">
+                    <div style="background:#f0ebff;border-radius:16px;padding:16px 24px;text-align:left;flex:1;min-width:160px;max-width:220px;transition:transform 0.3s ease;">
+                      <div style="font-size:10px;text-transform:uppercase;color:var(--muted);letter-spacing:.1em;">💡 Совет</div>
+                      <div style="font-size:14px;font-weight:600;margin-top:4px;">Увеличьте бюджет</div>
+                      <div style="font-size:12px;color:var(--muted);">Попробуйте от 10 000 ₽</div>
+                    </div>
+                    <div style="background:#fff0eb;border-radius:16px;padding:16px 24px;text-align:left;flex:1;min-width:160px;max-width:220px;transition:transform 0.3s ease;">
+                      <div style="font-size:10px;text-transform:uppercase;color:var(--muted);letter-spacing:.1em;">💡 Совет</div>
+                      <div style="font-size:14px;font-weight:600;margin-top:4px;">Расширьте вайбы</div>
+                      <div style="font-size:12px;color:var(--muted);">Добавьте ещё 1-2 тега</div>
+                    </div>
+                    <div style="background:#f3ffd0;border-radius:16px;padding:16px 24px;text-align:left;flex:1;min-width:160px;max-width:220px;transition:transform 0.3s ease;">
+                      <div style="font-size:10px;text-transform:uppercase;color:var(--muted);letter-spacing:.1em;">💡 Совет</div>
+                      <div style="font-size:14px;font-weight:600;margin-top:4px;">Смените даты</div>
+                      <div style="font-size:12px;color:var(--muted);">Выходные vs будни</div>
+                    </div>
+                  </div>
+                  <button onclick="location.reload()" class="primary-btn" style="margin-top:35px;">Попробовать снова →</button>
+                </div>
+              `;
+                    return;
+                }
+                renderMatchDetail(data.matches, 0);
+            } catch (e) {
+                out.innerHTML =
+                    `<div class="form-card"><div class="error">Не удалось загрузить результат: ${escapeHtml(e.message)}</div></div>`;
+            }
+        }
 
+        function renderMatchDetail(matches, activeIndex) {
+            const out = document.getElementById('result-out');
+            const match = matches[activeIndex];
+            if (!match || !out) return;
 
-function transportTypeLabel(type) {
+            const score = normalizeScore(match.total_score);
+            const city = match.city || 'Ваш город';
+            const image = cityImage(city);
+            const p1 = match.participant_1 || {};
+            const p2 = match.participant_2 || {};
+            const transport1 = Number(p1.transport_price || 0);
+            const transport2 = Number(p2.transport_price || 0);
+            const avgTransport = Math.round((transport1 + transport2) / 2);
+            const vibe1 = Math.round(Number(p1.vibe_match || 0) * 100);
+            const vibe2 = Math.round(Number(p2.vibe_match || 0) * 100);
+            const vibeAvg = Math.round((vibe1 + vibe2) / 2);
+            const isTop = activeIndex === 0;
+            const otherMatches = matches.map((m, i) => ({ m, i })).filter(({ i }) => i !== activeIndex);
 
-  const key =
-    String(type || '')
-      .toLowerCase()
-      .trim();
+            const hasHotel = match.hotel && match.hotel.name;
 
-  return TRANSPORT_LABELS[key] || (type || 'Транспорт');
+            out.innerHTML = `
+            <section class="result-hero">
+              <div class="result-bg" style="background-image:url('${image}')"></div>
+              <div class="result-content">
+                <div class="match-badge">${score}% совпадение${isTop?'':' · альтернатива'}</div>
+                <h1 class="result-city">${escapeHtml(city)}</h1>
+                <div class="result-sub">
+                  <div class="result-chip">✈ ~${formatMoney(avgTransport)} ₽ транспорт</div>
+                  <div class="result-chip">✦ ${vibeAvg}% совпадение по вайбу</div>
+                  <div class="result-chip">♡ подходит вам обоим</div>
+                </div>
+              </div>
+            </section>
 
-}
+            <section class="metrics">
+              <div class="metric">
+                <div class="metric-label">Совпадение</div>
+                <div class="metric-value" id="score-counter">0%</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Транспорт</div>
+                <div class="metric-value">~${formatMoney(avgTransport)} ₽</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Участник 01</div>
+                <div class="metric-value">${vibe1}% вайб</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Участник 02</div>
+                <div class="metric-value">${vibe2}% вайб</div>
+              </div>
+            </section>
 
+            <section style="margin-bottom:38px">
+              <div class="section-title"><h3>Как добраться?</h3><span>билеты на Tutu</span></div>
+              <div class="runners">
+                ${transportCardHtml('Участник 01', p1)}
+                ${transportCardHtml('Участник 02', p2)}
+              </div>
+            </section>
 
-function formatMoney(value) {
+            ${hasHotel ? `
+              <section style="margin-bottom:38px">
+                ${hotelSectionHtml(match.hotel)}
+              </section>
+            ` : ''}
 
-  return Number(
-    value || 0
-  ).toLocaleString(
-    'ru-RU'
-  );
+            ${match.why && match.why.length ? `
+              <section style="margin-bottom:38px">
+                ${whySectionHtml(match.why)}
+              </section>
+            ` : ''}
 
-}
+            ${otherMatches.length ? `
+              <section>
+                ${alternativesSectionHtml(otherMatches)}
+              </section>
+            ` : ''}
 
+            <div class="bottom-note">
+              <h3>${isTop ? 'Ваш компромисс найден.' : 'Хороший запасной вариант.'}</h3>
+              <p>Два набора желаний. Один город. Осталось только купить билеты.</p>
+            </div>
+          `;
 
-function escapeHtml(value) {
+            setTimeout(() => {
+                const counterEl = document.getElementById('score-counter');
+                if (counterEl) {
+                    const target = parseInt(score);
+                    animateCounter(counterEl, target);
+                }
+            }, 300);
 
-  return String(
-    value ?? ''
-  )
-    .replace(
-      /&/g,
-      '&amp;'
-    )
-    .replace(
-      /</g,
-      '&lt;'
-    )
-    .replace(
-      />/g,
-      '&gt;'
-    )
-    .replace(
-      /"/g,
-      '&quot;'
-    )
-    .replace(
-      /'/g,
-      '&#039;'
-    );
+            document.querySelectorAll('.js-alt').forEach(el => {
+                el.onclick = () => {
+                    const idx = Number(el.dataset.index);
+                    renderMatchDetail(matches, idx);
+                    out.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                };
+            });
+        }
 
-}
+        // ============================================================
+        // 8. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+        // ============================================================
 
+        function transportCardHtml(label, p) {
+            const price = Number(p.transport_price || 0);
+            const type = transportTypeLabel(p.transport_type);
+            const url = p.transport_checkout_url;
+            const duration = p.transport_duration_min;
+            const depTime = p.transport_departure_time;
+            const arrTime = p.transport_arrival_time;
+            const depDate = p.transport_departure_date;
+            const arrDate = p.transport_arrival_date;
+            let durationStr = '';
+            if (duration) {
+                const h = Math.floor(duration / 60);
+                const m = duration % 60;
+                durationStr = h > 0 ? `${h} ч ${m} мин` : `${m} мин`;
+            }
+            let depStr = '';
+            if (depTime && depDate) depStr = `${depDate} ${depTime}`;
+            else if (depTime) depStr = depTime;
+            let arrStr = '';
+            if (arrTime && arrDate) arrStr = `${arrDate} ${arrTime}`;
+            else if (arrTime) arrStr = arrTime;
 
-function escapeAttr(value) {
+            return `
+            <div class="runner card-lift">
+              <div style="display:flex;justify-content:space-between;align-items:center;width:100%;">
+                <div>
+                  <div class="runner-rank">${escapeHtml(label)} · ${escapeHtml(type)}</div>
+                  <div class="runner-city" style="font-size:24px">${formatMoney(price)} ₽</div>
+                  ${p.within_budget === false ? '<div class="hotel-meta" style="color:#c83c22;margin-top:6px">вне бюджета</div>' : ''}
+                </div>
+                ${url ? `<a href="${escapeAttr(url)}" target="_blank" rel="noopener" class="secondary-btn" style="text-decoration:none;align-self:center;white-space:nowrap">Купить на Tutu →</a>` : ''}
+              </div>
+              ${(depStr || arrStr || durationStr) ? `
+                <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);width:100%;">
+                  ${depStr ? `<span>🛫 ${escapeHtml(depStr)}</span>` : ''}
+                  ${arrStr ? `<span>🛬 ${escapeHtml(arrStr)}</span>` : ''}
+                  ${durationStr ? `<span>⏱ ${escapeHtml(durationStr)}</span>` : ''}
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }
 
-  return escapeHtml(value);
+        function hotelSectionHtml(hotel) {
+            if (!hotel || !hotel.name) {
+                return `
+              <div class="section-title"><h3>Где остановиться?</h3><span>поиск на Tutu</span></div>
+              <div class="hotel-box glass-card" style="background:var(--muted);color:white">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap">
+                  <div>
+                    <div class="hotel-title">Не удалось найти отель в вашем бюджете</div>
+                    <div class="hotel-meta">Попробуйте поискать самостоятельно</div>
+                  </div>
+                  <a href="https://www.tutu.ru/hotels/" target="_blank" rel="noopener" class="copy-btn" style="text-decoration:none;white-space:nowrap;background:white;color:var(--ink)">Найти отель на Tutu →</a>
+                </div>
+              </div>
+            `;
+            }
 
-}
+            return `
+            <div class="section-title"><h3>Где остановиться?</h3><span>рекомендованный отель</span></div>
+            <div class="hotel-box glass-card">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap">
+                <div>
+                  <div class="hotel-title">
+                    ${escapeHtml(hotel.name || 'Рекомендованный отель')}
+                    ${hotel.stars ? ' ' + '★'.repeat(Number(hotel.stars)) : ''}
+                  </div>
+                  <div class="hotel-meta">
+                    ${hotel.price ? formatMoney(Math.round(Number(hotel.price))) + ' ₽' : 'Цена не указана'}
+                    ${hotel.breakfast_included ? ' · завтрак включён' : ''}
+                  </div>
+                </div>
+                ${hotel.checkout_url
+                  ? `<a href="${escapeAttr(hotel.checkout_url)}" target="_blank" rel="noopener" class="copy-btn" style="text-decoration:none;white-space:nowrap">Забронировать на Tutu →</a>`
+                  : `<a href="https://www.tutu.ru/hotels/" target="_blank" rel="noopener" class="copy-btn" style="text-decoration:none;white-space:nowrap;background:white;color:var(--ink)">Найти отель на Tutu →</a>`
+                }
+              </div>
+            </div>
+          `;
+        }
 
+        function whySectionHtml(places) {
+            const foodKeywords = ['food', 'restaurant', 'cafe', 'bar', 'fast_food', 'cuisine', 'meal', 'dining', 'eat'];
+            const placeKeywords = ['cultural', 'museum', 'historic', 'architecture', 'nature', 'park', 'monument', 'attraction', 'church', 'cathedral', 'square', 'garden', 'landmark', 'view', 'panorama', 'castle', 'fortress', 'memorial', 'theatre', 'opera', 'gallery', 'exhibition'];
 
-const CITY_IMAGES = {
+            const foodPlaces = [];
+            const otherPlaces = [];
 
-  rome:
-    'https://images.unsplash.com/photo-1529260830199-42c24126f198?auto=format&fit=crop&w=1600&q=85',
+            places.forEach(place => {
+                const kinds = (place.kinds || '').toLowerCase();
+                const isFood = foodKeywords.some(kw => kinds.includes(kw));
+                const isPlace = placeKeywords.some(kw => kinds.includes(kw));
 
-  paris:
-    'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1600&q=85',
+                if (isFood) {
+                    foodPlaces.push(place);
+                } else if (isPlace || !isFood) {
+                    otherPlaces.push(place);
+                }
+            });
 
-  barcelona:
-    'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?auto=format&fit=crop&w=1600&q=85',
+            const showFood = foodPlaces.length > 0;
+            const showPlaces = otherPlaces.length > 0 || !showFood;
+            const placesToShow = showPlaces ? (showFood ? otherPlaces : places) : [];
 
-  lisbon:
-    'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?auto=format&fit=crop&w=1600&q=85',
+            return `
+            <div class="section-title"><h3>Почему сюда?</h3><span>под ваш общий вайб</span></div>
+            <div style="display:grid;grid-template-columns:${showFood && showPlaces ? '1fr 1fr' : '1fr'};gap:15px">
+              ${showPlaces && placesToShow.length > 0 ? `
+                <div class="hotel-box glass-card" style="background:var(--purple);color:white">
+                  <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;opacity:.8">🏛 Места</div>
+                  ${placesToShow.slice(0, 3).map(place => `
+                    <div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.15)">
+                      <div class="hotel-title" style="font-size:14px">${escapeHtml(place.name || 'Место')}</div>
+                      <div style="font-size:11px;opacity:.8;margin-top:3px">${escapeHtml((place.kinds || '').split(',')[0].replace(/_/g, ' '))}</div>
+                      ${place.description ? `<div style="font-size:11px;opacity:.7;margin-top:4px;line-height:1.4">${escapeHtml(place.description)}</div>` : ''}
+                    </div>
+                  `).join('')}
+                </div>
+              ` : ''}
+              ${showFood && foodPlaces.length > 0 ? `
+                <div class="hotel-box glass-card" style="background:var(--orange);color:white">
+                  <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;opacity:.8">🍽 Еда</div>
+                  ${foodPlaces.slice(0, 3).map(place => `
+                    <div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.15)">
+                      <div class="hotel-title" style="font-size:14px">${escapeHtml(place.name || 'Место')}</div>
+                      <div style="font-size:11px;opacity:.8;margin-top:3px">${escapeHtml((place.kinds || '').split(',')[0].replace(/_/g, ' '))}</div>
+                      ${place.description ? `<div style="font-size:11px;opacity:.7;margin-top:4px;line-height:1.4">${escapeHtml(place.description)}</div>` : ''}
+                    </div>
+                  `).join('')}
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }
 
-  prague:
-    'https://images.unsplash.com/photo-1519671282429-b44660ead0a7?auto=format&fit=crop&w=1600&q=85',
+        function alternativesSectionHtml(others) {
+            return `
+            <div class="section-title"><h3>Ещё варианты</h3><span>нажмите, чтобы посмотреть подробнее</span></div>
+            <div class="runners">
+              ${others.map(({ m, i }) => `
+                <div class="runner js-alt card-lift" data-index="${i}" style="cursor:pointer">
+                  <div>
+                    <div class="runner-rank">${i === 0 ? '01 · ЛУЧШИЙ ВАРИАНТ' : '0' + (i + 1) + ' · АЛЬТЕРНАТИВА'}</div>
+                    <div class="runner-city">${escapeHtml(m.city || 'Неизвестно')}</div>
+                  </div>
+                  <div class="runner-score">${normalizeScore(m.total_score)}%</div>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        }
 
-  budapest:
-    'https://images.unsplash.com/photo-1541849546-216549ae216d?auto=format&fit=crop&w=1600&q=85',
+        // ============================================================
+        // 9. БАЗОВЫЕ ХЕЛПЕРЫ
+        // ============================================================
 
-  istanbul:
-    'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=1600&q=85',
+        function normalizeScore(score) {
+            let n = Number(score || 0);
+            if (n <= 1) n *= 100;
+            return Math.round(Math.max(0, Math.min(100, n)));
+        }
 
-  amsterdam:
-    'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?auto=format&fit=crop&w=1600&q=85'
+        const TRANSPORT_LABELS = {
+            train: 'Поезд',
+            railway: 'Поезд',
+            suburban: 'Электричка',
+            plane: 'Самолёт',
+            avia: 'Самолёт',
+            bus: 'Автобус',
+            water: 'Водный транспорт'
+        };
 
-};
+        function transportTypeLabel(type) {
+            const key = String(type || '').toLowerCase().trim();
+            return TRANSPORT_LABELS[key] || (type || 'Транспорт');
+        }
 
+        function formatMoney(value) {
+            return Number(value || 0).toLocaleString('ru-RU');
+        }
 
-function cityImage(city) {
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
 
-  const key =
-    String(city || '')
-      .toLowerCase()
-      .trim();
+        function escapeAttr(value) {
+            return escapeHtml(value);
+        }
 
+        // ============================================================
+        // 10. СТАРТ
+        // ============================================================
 
-  for (
-    const name in CITY_IMAGES
-  ) {
-
-    if (
-      key.includes(name)
-    ) {
-
-      return CITY_IMAGES[name];
-
-    }
-
-  }
-
-
-  return 'https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=1600&q=85';
-
-}
-
-
-/* =========================================================
-   START
-========================================================= */
-
-route();
-
-</script>
+        route();
+    </script>
 
 </body>
 </html>
