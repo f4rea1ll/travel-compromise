@@ -48,5 +48,31 @@ Base URL (dev): `http://localhost:8000`
 }
 ```
 
-## GET /session/{session_id}/result — В РАЗРАБОТКЕ (готово к ~15:00)
-Вернёт топ-3 направления с разбивкой по каждому участнику. Структура ответа будет добавлена сюда по готовности.
+## GET /session/{session_id}/result
+Возвращает топ-3 направления с разбивкой по каждому участнику. Требует, чтобы оба участника уже отправили анкету.
+
+**Response 200:**
+```json
+{
+  "session_id": "a1b2c3d4",
+  "matches": [
+    {
+      "city": "Ярославль",
+      "total_score": 1.6,
+      "participant_1": {
+        "transport_price": 805.0,
+        "within_budget": true,
+        "vibe_match": 0.5
+      },
+      "participant_2": {
+        "transport_price": 2903.38,
+        "within_budget": true,
+        "vibe_match": 0.5
+      }
+    }
+  ]
+}
+```
+
+**Response 400:** если один из участников ещё не заполнил анкету.
+**Response 404:** если не найдено ни одного подходящего направления.
