@@ -68,22 +68,31 @@ async def score_candidate(city: str, p1: dict, p2: dict) -> dict | None:
     }
 
 async def get_best_hotel(city: str, check_in: str, check_out: str, budget: float) -> dict | None:
-    """Ищет лучший отель в городе в рамках остатка бюджета после дороги. None, если ничего не нашлось."""
+    """Ищет лучший отель в городе в рамках бюджета. None, если ничего не нашлось."""
     try:
         result = await search_hotels(city, check_in, check_out, price_max=budget)
         hotels = result.get("hotels", [])
         if not hotels:
             return None
 
-        # Берём первый — search_hotels уже сортирует по релевантности/цене
-        top = hotels[0]
+        affordable = [
+            h for h in hotels
+            if h.get("best_offer", {}).get("price", {}).get("amount", float("inf")) <= budget
+        ]
+
+        if not affordable:
+            return None
+
+        affordable.sort(key=lambda h: h.get("rating") or 0, reverse=True)
+        top = affordable[0]
         best_offer = top.get("best_offer", {})
 
         return {
             "name": top.get("name"),
             "stars": top.get("stars"),
             "rating": top.get("rating"),
-            "price": best_offer.get("price"),
+            "price": best_offer.get("price", {}).get("amount"),
+            "currency": best_offer.get("price", {}).get("currency"),
             "breakfast_included": best_offer.get("breakfast_included"),
             "checkout_url": best_offer.get("checkout_url"),
         }
